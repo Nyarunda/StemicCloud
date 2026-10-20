@@ -10,7 +10,9 @@ no_cache = 1
 def get_context(context):
 	from stemic_cloud.accounts import verify
 
-	context.update({"title": _("Confirm your email"), "no_cache": 1, "show_sidebar": False})
+	from stemic_cloud.ornament import rosette
+
+	context.update({"title": _("Confirm your email"), "rosette": rosette(200), "no_cache": 1, "show_sidebar": False})
 	try:
 		link = verify(frappe.form_dict.get("token"))
 	except frappe.Redirect:

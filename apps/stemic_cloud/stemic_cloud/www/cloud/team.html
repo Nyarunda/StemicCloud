@@ -1,26 +1,45 @@
 {% extends "stemic_cloud/templates/cloud/base.html" %}
 {% block cloud_content %}
-<h1>{{ _("Team") }}</h1><div class="sub">{{ _("Who manages {0} on this portal. ERP access is managed inside the ERP.").format(org.org_name) }}</div>
-{% if can("manage_team") %}
-<div class="sc-panel" style="margin-bottom: 16px"><h2>{{ _("Invite someone") }}</h2>
-	<div id="invite" class="sc-row">
-		<div><label>{{ _("Email") }}</label><input type="email" name="email"></div>
-		<div><label>{{ _("Role") }}</label><select name="role">{% for r in roles %}{% if r != "Owner" or role == "Owner" %}<option {{ 'selected' if r == 'Member' else '' }}>{{ r }}</option>{% endif %}{% endfor %}</select></div>
-		<div style="flex: none"><button class="sc-btn primary" onclick="sc.call('stemic_cloud.accounts.invite', {organization: sc.org, ...sc.form('invite')}, () => location.reload())">{{ _("Send invitation") }}</button></div>
-	</div>
-	<p class="sc-muted" style="font-size: .8rem; margin-top: 10px">{{ _("Owner: everything, including plan and cancellation. Admin: team, ERP environment, onboarding. Billing Admin: invoices and payments. Member: view.") }}</p>
-</div>{% endif %}
-<div class="sc-panel" style="margin-bottom: 16px"><h2>{{ _("Members") }}</h2>
-	<table><tr><th>{{ _("Name") }}</th><th>{{ _("Email") }}</th><th>{{ _("Role") }}</th><th>{{ _("Last login") }}</th><th></th></tr>
-		{% for m in members %}<tr><td>{{ m.full_name }}</td><td>{{ m.user }}</td>
-			<td>{% if can("manage_team") and m.user != frappe.session.user %}<select onchange="sc.call('stemic_cloud.accounts.change_member', {member: '{{ m.name }}', role: this.value}, () => location.reload())">
+<h1>{{ _("Team") }}</h1>
+<p class="sc-lede">{{ _("The people who manage this account. Giving someone a place here does not give them the ERP; add ERP users inside the ERP.") }}</p>
+
+<section>
+	<h2>{{ _("People") }}</h2>
+	<div class="sc-scroll"><table class="sc-table">
+		<tr><th>{{ _("Name") }}</th><th>{{ _("Role") }}</th><th>{{ _("Last signed in") }}</th><th></th></tr>
+		{% for m in members %}{% set me = m.user == frappe.session.user %}<tr>
+			<td><b>{{ m.full_name }}</b>{% if me %} <span class="sc-quiet">({{ _("you") }})</span>{% endif %}<br><span class="sc-quiet sc-small">{{ m.user }}</span></td>
+			<td>{% if can("manage_team") and not me %}<label class="sc-hide" for="r-{{ m.name }}">{{ _("Role of {0}").format(m.full_name) }}</label><select class="sc-in" id="r-{{ m.name }}" style="min-height: 36px; width: auto" onchange="sc.call('stemic_cloud.accounts.change_member', {member: '{{ m.name }}', role: this.value}, () => location.reload())">
 				{% for r in roles %}<option {{ 'selected' if r == m.role else '' }}>{{ r }}</option>{% endfor %}</select>{% else %}{{ _(m.role) }}{% endif %}</td>
-			<td class="sc-muted">{{ fmt_dt(m.last_login) }}</td>
-			<td class="num">{% if can("manage_team") and m.user != frappe.session.user %}<button class="sc-btn danger sm" onclick="if (confirm('{{ _('Remove this member?') }}')) sc.call('stemic_cloud.accounts.change_member', {member: '{{ m.name }}', remove: 1}, () => location.reload())">{{ _("Remove") }}</button>{% endif %}</td></tr>{% endfor %}</table>
+			<td class="sc-quiet">{{ fmt_dt(m.last_login) or _("Not yet") }}</td>
+			<td class="num">{% if can("manage_team") and not me %}<button class="sc-btn sm stop" onclick="if (confirm('{{ _('Remove {0} from this account?').format(m.full_name) }}')) sc.call('stemic_cloud.accounts.change_member', {member: '{{ m.name }}', remove: 1}, () => location.reload(), this)">{{ _("Remove") }}</button>{% endif %}</td></tr>{% endfor %}
+		{% for i in invitations %}<tr>
+			<td><b>{{ i.email }}</b><br><span class="sc-quiet sc-small">{{ _("Invited, link valid until {0}").format(fmt_dt(i.expires_on)) }}</span></td>
+			<td>{{ _(i.role) }}</td><td class="sc-quiet">{{ _("Not yet") }}</td>
+			<td class="num">{% if can("manage_team") %}<button class="sc-btn sm quiet" onclick="sc.call('stemic_cloud.accounts.revoke_invitation', {invitation: '{{ i.name }}'}, () => location.reload(), this)">{{ _("Withdraw invitation") }}</button>{% endif %}</td></tr>{% endfor %}
+	</table></div>
+</section>
+
+{% if can("manage_team") %}
+<div class="sc-cols sc-section">
+	<section>
+		<h2>{{ _("Invite someone") }}</h2>
+		<div id="invite" class="sc-inline">
+			<div><label class="f" for="inv-email">{{ _("Their work email") }}</label><input class="sc-in" type="email" id="inv-email" name="email" autocomplete="off"></div>
+			<div style="flex: 0 1 180px"><label class="f" for="inv-role">{{ _("Role") }}</label><select class="sc-in" id="inv-role" name="role">{% for r in roles %}{% if r != "Owner" or role == "Owner" %}<option {{ 'selected' if r == 'Member' else '' }}>{{ r }}</option>{% endif %}{% endfor %}</select></div>
+			<div style="flex: none"><button class="sc-btn go" onclick="sc.call('stemic_cloud.accounts.invite', {organization: sc.org, ...sc.form('invite')}, () => location.reload(), this)">{{ _("Send invitation") }}</button></div>
+		</div>
+		<p class="sc-quiet sc-small" style="margin-top: 12px">{{ _("They get an email with a link that works for a week.") }}</p>
+	</section>
+	<section>
+		<h2>{{ _("What each role can do") }}</h2>
+		<table class="sc-sched">
+			<tr><th>{{ _("Owner") }}</th><td style="font-weight: 400">{{ _("Everything, including the plan, cancelling, and copies of the data") }}</td></tr>
+			<tr><th>{{ _("Admin") }}</th><td style="font-weight: 400">{{ _("The team, the ERP environment, the set-up guide, Stemic support access") }}</td></tr>
+			<tr><th>{{ _("Billing Admin") }}</th><td style="font-weight: 400">{{ _("Invoices and payments") }}</td></tr>
+			<tr><th>{{ _("Member") }}</th><td style="font-weight: 400">{{ _("Sees the overview and the ERP's state") }}</td></tr>
+		</table>
+	</section>
 </div>
-{% if invitations %}<div class="sc-panel"><h2>{{ _("Pending invitations") }}</h2>
-	<table><tr><th>{{ _("Email") }}</th><th>{{ _("Role") }}</th><th>{{ _("Expires") }}</th><th></th></tr>
-		{% for i in invitations %}<tr><td>{{ i.email }}</td><td>{{ _(i.role) }}</td><td>{{ fmt_dt(i.expires_on) }}</td>
-			<td class="num">{% if can("manage_team") %}<button class="sc-btn sm" onclick="sc.call('stemic_cloud.accounts.revoke_invitation', {invitation: '{{ i.name }}'}, () => location.reload())">{{ _("Revoke") }}</button>{% endif %}</td></tr>{% endfor %}</table>
-</div>{% endif %}
+{% endif %}
 {% endblock %}

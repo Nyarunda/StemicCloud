@@ -1,43 +1,58 @@
 {% extends "stemic_cloud/templates/cloud/base.html" %}
+{% from "stemic_cloud/templates/cloud/macros.html" import stamp, SUB, INV %}
 {% block cloud_content %}
-<h1>{{ _("Subscription & Billing") }}</h1><div class="sub">{{ org.org_name }}</div>
-<div class="sc-grid sc-cols-2" style="margin-bottom: 16px">
-	<div class="sc-panel"><h2>{{ _("Subscription") }}</h2>
-		{% if sub %}<dl class="sc-dl">
-			<dt>{{ _("Plan") }}</dt><dd>{{ plan.plan_name }}</dd>
-			<dt>{{ _("Billing") }}</dt><dd>{{ _(sub.billing_cycle) }}</dd>
-			<dt>{{ _("Status") }}</dt><dd><span class="sc-pill {{ {'Active': 'good', 'Trial': 'info', 'Past Due': 'warn', 'Grace': 'warn', 'Suspended': 'bad', 'Cancelled': 'bad'}.get(sub.status, '') }}">{{ _(sub.status) }}</span></dd>
-			{% if sub.trial_ends_on %}<dt>{{ _("Trial ends") }}</dt><dd>{{ fmt_date(sub.trial_ends_on) }}</dd>{% endif %}
-			{% if sub.current_period_end %}<dt>{{ _("Renews") }}</dt><dd>{{ fmt_date(sub.current_period_end) }}</dd>{% endif %}
-			<dt>{{ _("ERP users") }}</dt><dd>{{ sub.active_users if sub.active_users is not none else "—" }}{% if plan.max_users %} / {{ plan.max_users }}{% endif %}</dd>
-		</dl>
-		{% if sub.status in ("Past Due", "Grace") %}<div class="sc-notice bad" style="margin-top: 14px">{{ _("An invoice is unpaid. Your ERP keeps working during the grace period; after it, it may become read-only until payment.") }}</div>{% endif %}
+<h1>{{ _("Billing") }}</h1>
+<p class="sc-lede">{{ _("Your plan, what you have been billed and what is still open. Pay by bank transfer or M-Pesa, quoting the invoice number.") }}</p>
+{% if sub and sub.status in ("Past Due", "Grace") %}<div class="sc-note warn">{{ _("An invoice is unpaid. Your ERP keeps working for now; if it stays unpaid after the grace period, it can become read-only until it is paid.") }}</div>{% endif %}
+{% if sub and sub.status == "Suspended" %}<div class="sc-note bad">{{ _("Your ERP is read-only until the open invoice is paid. You can still read every record.") }}</div>{% endif %}
+
+<section>
+	<h2>{{ _("Invoices") }}</h2>
+	{% if invoices %}<div class="sc-scroll"><table class="sc-table">
+		<tr><th>{{ _("Invoice") }}</th><th>{{ _("For") }}</th><th>{{ _("Due") }}</th><th>{{ _("Standing") }}</th><th class="num">{{ _("Amount") }}</th></tr>
+		{% for i in invoices %}<tr><td><b>{{ i.name }}</b></td><td>{{ fmt_date(i.period_start) }} to {{ fmt_date(i.period_end) }}</td><td>{{ fmt_date(i.due_date) }}</td>
+			<td>{{ stamp(_("Open") if i.status == "Issued" else _(i.status), INV.get(i.status, "")) }}{% if i.payment_reference %} <span class="sc-quiet sc-small">{{ i.payment_reference }}</span>{% endif %}</td>
+			<td class="num"><b>{{ money(i.amount, i.currency) }}</b></td></tr>{% endfor %}
+	</table></div>
+	{% else %}<p class="sc-clear">{{ _("No invoices yet. The first comes when your free trial ends.") }}</p>{% endif %}
+</section>
+
+<div class="sc-cols sc-section">
+	<section>
+		<h2>{{ _("Your plan") }}</h2>
+		{% if sub %}<table class="sc-sched">
+			<tr><th>{{ _("Plan") }}</th><td>{{ plan.plan_name }}, {{ _(sub.billing_cycle)|lower }}</td></tr>
+			<tr><th>{{ _("Standing") }}</th><td>{{ stamp(_(sub.status), SUB.get(sub.status, "")) }}</td></tr>
+			{% if sub.trial_ends_on and sub.status == "Trial" %}<tr><th>{{ _("Free until") }}</th><td>{{ fmt_date(sub.trial_ends_on) }}</td></tr>{% endif %}
+			{% if sub.current_period_end %}<tr><th>{{ _("Paid up to") }}</th><td>{{ fmt_date(sub.current_period_end) }}</td></tr>{% endif %}
+			<tr><th>{{ _("ERP users") }}</th><td>{{ sub.active_users if sub.active_users is not none else _("Counted daily") }}{% if plan.max_users %} {{ _("of {0}").format(plan.max_users) }}{% endif %}</td></tr>
+		</table>
 		{% if can("cancel") and sub.status != "Cancelled" %}
-		<button class="sc-btn danger sm" style="margin-top: 14px" onclick="sc.toggle('cancel-form')">{{ _("Cancel subscription") }}</button>
-		<div id="cancel-form" style="display: none"><label>{{ _("Why are you leaving?") }}</label><textarea name="reason" rows="2"></textarea>
-			<button class="sc-btn danger" style="margin-top: 8px" onclick="if (confirm('{{ _('Cancel the subscription? Your data is kept until the export and termination are agreed.') }}')) sc.call('stemic_cloud.subscriptions.cancel', {organization: sc.org, ...sc.form('cancel-form')}, () => location.reload())">{{ _("Confirm cancellation") }}</button></div>
+		<details style="margin-top: 26px"><summary>{{ _("Cancel the subscription") }}</summary>
+			<div id="cancel-form" style="margin-top: 10px">
+				<p class="sc-quiet sc-small">{{ _("No further invoices are made. Your ERP and its data are kept until we agree the export with you.") }}</p>
+				<label class="f" for="reason">{{ _("Why are you leaving?") }}</label><textarea class="sc-in" id="reason" name="reason"></textarea>
+				<button class="sc-btn stop" style="margin-top: 12px" onclick="if (confirm('{{ _('Cancel the subscription?') }}')) sc.call('stemic_cloud.subscriptions.cancel', {organization: sc.org, ...sc.form('cancel-form')}, () => location.reload(), this)">{{ _("Cancel the subscription") }}</button>
+			</div></details>
 		{% endif %}
-		{% else %}<div class="sc-empty">{{ _("No subscription") }}</div>{% endif %}
-	</div>
-	<div class="sc-panel"><h2>{{ _("Change plan") }}</h2>
+		{% else %}<p class="sc-clear">{{ _("No subscription on this account.") }}</p>{% endif %}
+	</section>
+	<section>
+		<h2>{{ _("Change plan") }}</h2>
 		{% if can("change_plan") and sub and sub.status != "Cancelled" %}
-		<div id="plan-form" class="sc-grid" style="gap: 10px">
-			{% for p in plans %}<label class="sc-plan"><input type="radio" name="plan" value="{{ p.name }}" {{ 'checked' if p.name == sub.plan else '' }} {{ 'disabled' if p.contact_sales else '' }}><b>{{ p.plan_name }}</b>
-				<div class="p">{% if p.contact_sales %}{{ _("Custom") }}{% else %}{{ money(p.monthly_price, p.currency) }}<span class="sc-muted" style="font-size: .8rem"> / {{ _("month") }}</span>{% endif %}</div>
-				<span class="sc-muted" style="font-size: .8rem">{{ _("{0} users").format(p.max_users) if p.max_users else _("Users by contract") }}</span></label>{% endfor %}
-			<select name="billing_cycle"><option value="Monthly" {{ 'selected' if sub.billing_cycle == 'Monthly' else '' }}>{{ _("Monthly") }}</option><option value="Annual" {{ 'selected' if sub.billing_cycle == 'Annual' else '' }}>{{ _("Annual") }}</option></select>
-			<button class="sc-btn primary" onclick="const v = sc.form('plan-form'); v.plan = (document.querySelector('#plan-form input[name=plan]:checked') || {}).value; sc.call('stemic_cloud.subscriptions.change_plan', {organization: sc.org, plan: v.plan, billing_cycle: v.billing_cycle}, () => location.reload())">{{ _("Change plan") }}</button>
-			<p class="sc-muted" style="font-size: .8rem; margin: 0">{{ _("The new plan applies from the next invoice.") }}</p>
+		<div id="plan-form">
+			<table class="sc-table">
+				{% for p in plans %}<tr><td style="width: 28px"><input type="radio" id="p-{{ p.name }}" name="plan" value="{{ p.name }}" {{ 'checked' if p.name == sub.plan else '' }} {{ 'disabled' if p.contact_sales else '' }} style="accent-color: var(--ink)"></td>
+					<td><label for="p-{{ p.name }}"><b>{{ p.plan_name }}</b>{% if p.name == sub.plan %} <span class="sc-quiet">({{ _("yours") }})</span>{% endif %}<br><span class="sc-quiet sc-small">{{ _("{0} ERP users").format(p.max_users) if p.max_users else _("Users by agreement") }}</span></label></td>
+					<td class="num">{% if p.contact_sales %}<span class="sc-quiet">{{ _("By agreement") }}</span>{% else %}{{ money(p.monthly_price, p.currency) }}<span class="sc-quiet sc-small"> {{ _("a month") }}</span>{% endif %}</td></tr>{% endfor %}
+			</table>
+			<div class="sc-inline" style="margin-top: 14px">
+				<div><label class="f" for="cycle">{{ _("Billed") }}</label><select class="sc-in" id="cycle" name="billing_cycle"><option value="Monthly" {{ 'selected' if sub.billing_cycle == 'Monthly' else '' }}>{{ _("Monthly") }}</option><option value="Annual" {{ 'selected' if sub.billing_cycle == 'Annual' else '' }}>{{ _("Yearly") }}</option></select></div>
+				<div style="flex: none"><button class="sc-btn go" onclick="const v = sc.form('plan-form'); sc.call('stemic_cloud.subscriptions.change_plan', {organization: sc.org, plan: v.plan, billing_cycle: v.billing_cycle}, () => location.reload(), this)">{{ _("Change plan") }}</button></div>
+			</div>
+			<p class="sc-quiet sc-small" style="margin-top: 12px">{{ _("The new plan applies from your next invoice.") }}</p>
 		</div>
-		{% else %}<div class="sc-empty">{{ _("Only the owner changes the plan.") }}</div>{% endif %}
-	</div>
-</div>
-<div class="sc-panel"><h2>{{ _("Invoices") }}</h2>
-	{% if invoices %}<table><tr><th>{{ _("Invoice") }}</th><th>{{ _("Period") }}</th><th>{{ _("Due") }}</th><th>{{ _("Status") }}</th><th class="num">{{ _("Amount") }}</th></tr>
-		{% for i in invoices %}<tr><td>{{ i.name }}</td><td>{{ fmt_date(i.period_start) }} – {{ fmt_date(i.period_end) }}</td><td>{{ fmt_date(i.due_date) }}</td>
-			<td><span class="sc-pill {{ {'Paid': 'good', 'Issued': 'warn', 'Void': ''}.get(i.status, '') }}">{{ _("Unpaid") if i.status == "Issued" else _(i.status) }}</span>{% if i.payment_reference %} <span class="sc-muted" style="font-size: .78rem">{{ i.payment_reference }}</span>{% endif %}</td>
-			<td class="num">{{ money(i.amount, i.currency) }}</td></tr>{% endfor %}</table>
-	{% else %}<div class="sc-empty">{{ _("No invoices yet") }}</div>{% endif %}
-	<p class="sc-muted" style="font-size: .8rem; margin-top: 12px">{{ _("Pay by bank transfer or M-Pesa quoting the invoice number; online payment comes soon.") }}</p>
+		{% else %}<p class="sc-clear">{{ _("Only the owner of the account changes the plan.") }}</p>{% endif %}
+	</section>
 </div>
 {% endblock %}

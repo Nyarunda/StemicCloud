@@ -3,6 +3,8 @@
 import frappe
 from frappe import _
 
+from stemic_cloud.ornament import rosette
+
 no_cache = 1
 
 ORG_TYPES = ["Insurance Broker", "Insurance Agency", "Insurer / Underwriter", "Managing General Agent",
@@ -22,7 +24,7 @@ def get_context(context):
 		p.features = frappe.get_all("Plan Feature", filters={"parent": p.name, "parenttype": "Subscription Plan"},
 			fields=["feature", "value"], order_by="idx")
 		p.trial = p.trial_days or s.trial_days
-	context.update({"title": _("Start your Stemic Insurance ERP"), "plans": plans, "org_types": ORG_TYPES,
+	context.update({"title": _("Open an account"), "rosette": rosette(200), "plans": plans, "org_types": ORG_TYPES,
 		"root_domain": s.root_domain, "terms_url": s.terms_url, "support_email": s.support_email,
 		"wanted": frappe.form_dict.get("plan"), "no_cache": 1, "show_sidebar": False, "full_width": 1,
 		"money": lambda v, c=None: frappe.format(v or 0, {"fieldtype": "Currency", "options": c, "precision": 0},

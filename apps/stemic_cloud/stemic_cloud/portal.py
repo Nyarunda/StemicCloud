@@ -7,11 +7,12 @@ from frappe.utils import cint, getdate, now_datetime
 
 from stemic_cloud.accounts import membership, my_organizations, require
 from stemic_cloud.audit import log
+from stemic_cloud.ornament import rosette
 from stemic_cloud.rules.membership_rules import ROLES, can
 from stemic_cloud.rules.onboarding_rules import STEPS, checklist, progress
 
-NAV = [("", "Dashboard"), ("erp", "My ERP"), ("billing", "Subscription & Billing"), ("team", "Team"),
-	("onboarding", "Onboarding"), ("security", "Security")]
+NAV = [("", "Overview"), ("erp", "Your ERP"), ("billing", "Billing"), ("team", "Team"),
+	("onboarding", "Set-up guide"), ("security", "Security")]
 
 
 def base(context, key, title):
@@ -29,7 +30,7 @@ def base(context, key, title):
 		"nav": [n for n in NAV if n[0] != "billing" or can(org.role, "view_billing")], "page_key": key, "title": _(title),
 		"full_name": frappe.utils.get_fullname(frappe.session.user),
 		"support_email": frappe.get_cached_doc("Cloud Settings").support_email,
-		"no_cache": 1, "show_sidebar": False, "full_width": 1, "can": lambda action: can(org.role, action),
+		"rosette": rosette(200), "no_cache": 1, "show_sidebar": False, "full_width": 1, "can": lambda action: can(org.role, action),
 		"fmt_date": lambda d: frappe.utils.formatdate(d) if d else "",
 		"fmt_dt": lambda d: frappe.utils.format_datetime(d, "dd-MM-yyyy HH:mm") if d else "",
 		"money": lambda v, c=None: frappe.format(v or 0, {"fieldtype": "Currency", "options": c, "precision": 2},
@@ -49,7 +50,7 @@ def _subscription(org):
 
 
 def dashboard(context):
-	org = base(context, "", "Dashboard")
+	org = base(context, "", "Overview")
 	sub, tenant = _subscription(org.name), _tenant(org.name)
 	plan = frappe.get_cached_doc("Subscription Plan", sub.plan) if sub else None
 	unpaid = frappe.get_all("Subscription Invoice", filters={"organization": org.name, "status": "Issued"},
@@ -61,18 +62,20 @@ def dashboard(context):
 		"activity": frappe.get_all("Cloud Audit Log", filters={"organization": org.name}, fields=["at", "action",
 			"actor"], order_by="at desc", limit=10),
 		"job": frappe.get_doc("Tenant Provisioning Job", tenant.last_job) if tenant and tenant.last_job else None,
-		"progress": progress({s.code for s in org.onboarding if s.done})})
+		"progress": progress({s.code for s in org.onboarding if s.done}),
+		"steps": checklist({s.code for s in org.onboarding if s.done}, tenant.url if tenant else ""),
+		"asks": frappe.db.count("Tenant Access Grant", {"organization": org.name, "status": "Requested"})})
 
 
 def erp(context):
-	org = base(context, "erp", "My ERP")
+	org = base(context, "erp", "Your ERP")
 	tenant = _tenant(org.name)
 	context.update({"tenant": tenant, "job": frappe.get_doc("Tenant Provisioning Job", tenant.last_job)
 		if tenant and tenant.last_job else None})
 
 
 def billing(context):
-	org = base(context, "billing", "Subscription & Billing")
+	org = base(context, "billing", "Billing")
 	require(org.name, "view_billing")
 	sub = _subscription(org.name)
 	context.update({"sub": sub, "plan": frappe.get_cached_doc("Subscription Plan", sub.plan) if sub else None,
@@ -95,7 +98,7 @@ def team(context):
 
 
 def onboarding(context):
-	org = base(context, "onboarding", "Onboarding")
+	org = base(context, "onboarding", "Set-up guide")
 	tenant = _tenant(org.name)
 	done = {s.code for s in org.onboarding if s.done}
 	context.update({"tenant": tenant, "steps": checklist(done, tenant.url if tenant else ""),
@@ -125,7 +128,7 @@ def invitation(context):
 		raise
 	except Exception as e:
 		frappe.db.rollback()
-		context.update({"error": frappe.utils.strip_html(str(e)), "title": _("Invitation")})
+		context.update({"error": frappe.utils.strip_html(str(e)), "title": _("Invitation"), "rosette": rosette(200)})
 		return
 	frappe.db.commit()  # a GET is not committed by Frappe: the account, membership and acceptance would be lost
 	frappe.local.flags.redirect_location = target

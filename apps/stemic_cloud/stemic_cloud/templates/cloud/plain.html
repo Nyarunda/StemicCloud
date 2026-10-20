@@ -1,0 +1,18 @@
+{% extends "templates/web.html" %}
+{#- The frame of the pages before a person has an account: registration, the email link, an invitation. -#}
+{% from "stemic_cloud/templates/cloud/macros.html" import mark %}
+{% block title %}{{ title }}, Stemic Insurance{% endblock %}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block page_content %}
+{% include "stemic_cloud/templates/cloud/style.html" %}
+<div class="sc">
+	<header class="sc-top"><div class="sc-top-in" style="padding-bottom: 14px">
+		<div class="sc-top-row">
+			<a class="sc-mark" href="/register">{{ mark(rosette) }}<span>Stemic Insurance</span></a>
+			<div class="sc-who"><a href="/login?redirect-to=/cloud">{{ _("Log in") }}</a></div>
+		</div>
+	</div></header>
+	<main class="sc-page">{% block plain_content %}{% endblock %}</main>
+</div>
+{% endblock %}

@@ -13,12 +13,13 @@ SECURITY = {"enable_password_policy": 1, "minimum_password_score": 3, "allow_con
 
 PLANS = [  # code, name, monthly (USD), users, contact sales, features
 	("STARTER", "Starter", 99, 5, 0, [("Policies, quotations and renewals", "Yes"), ("Commissions", "Yes"),
-		("Agent portal", "No"), ("Daily backups", "Yes"), ("Support", "Email")]),
+		("Agent portal", "No"), ("Claims and reinsurance", "No"), ("Daily backups", "Yes"), ("Support", "Email")]),
 	("BUSINESS", "Business", 249, 20, 0, [("Policies, quotations and renewals", "Yes"), ("Commissions", "Yes"),
 		("Agent portal", "Yes"), ("Claims and reinsurance", "Yes"), ("Daily backups", "Yes"),
 		("Support", "Email and phone")]),
-	("ENTERPRISE", "Enterprise", 0, 0, 1, [("Everything in Business", "Yes"), ("Own server", "Optional"),
-		("Integrations (IPRS, DMVIC, core banking)", "Yes"), ("Support", "Dedicated")]),
+	("ENTERPRISE", "Enterprise", 0, 0, 1, [("Policies, quotations and renewals", "Yes"), ("Commissions", "Yes"),
+		("Agent portal", "Yes"), ("Claims and reinsurance", "Yes"), ("Integrations (IPRS, DMVIC, core banking)", "Yes"),
+		("Own server", "Optional"), ("Daily backups", "Yes"), ("Support", "Dedicated")]),
 ]
 
 

@@ -142,3 +142,16 @@ class TestLogins(unittest.TestCase):
 		at = dt(2026, 10, 19, 10)
 		self.assertEqual(login_findings("41.90.12.9", ["41.90.12.7"], at, None), [])
 		self.assertTrue(login_findings("102.1.1.1", ["41.90.12.7"], at, None))
+
+
+class TestOrnament(unittest.TestCase):
+	def test_rosette_paths_fit_the_box(self):
+		import re
+
+		from stemic_cloud.ornament import rosette
+
+		paths = rosette(200)
+		self.assertEqual(len(paths), 4)
+		for d in paths:
+			nums = [float(n) for n in re.findall(r"-?\d+\.\d+", d)]
+			self.assertTrue(all(-1 <= n <= 201 for n in nums))

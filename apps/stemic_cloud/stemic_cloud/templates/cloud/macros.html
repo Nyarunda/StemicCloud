@@ -1,0 +1,30 @@
+{#- The seal (a guilloche rosette, the ERP's state) and the stamp (a status). `rosette` comes from portal.base. -#}
+{% macro seal(paths, kind, word, size=168) -%}
+<div class="sc-seal {{ kind }}" style="width: {{ size }}px; height: {{ size }}px">
+	<svg viewBox="0 0 200 200" aria-hidden="true">
+		<path d="{{ paths[0] }}" stroke-width=".35" opacity=".85"/>
+		<path d="{{ paths[1] }}" stroke-width=".4" opacity=".6"/>
+		<path d="{{ paths[2] }}" stroke-width=".4"/>
+		<path d="{{ paths[3] }}" stroke-width=".5" opacity=".9"/>
+	</svg>
+	{% if word %}<div class="w"><span>{{ word }}</span></div>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro mark(paths) -%}
+<svg viewBox="0 0 200 200" aria-hidden="true"><path d="{{ paths[2] }}" fill="none" stroke="currentColor" stroke-width="5"/></svg>
+{%- endmacro %}
+
+{%- set SUB = {"Active": "good", "Trial": "info", "Past Due": "warn", "Grace": "warn", "Suspended": "bad", "Cancelled": "bad"} -%}
+{%- set INV = {"Paid": "good", "Issued": "warn", "Void": ""} -%}
+{%- set GRANT = {"Approved": "good", "Requested": "info", "Rejected": "bad"} -%}
+{% macro stamp(text, kind="") -%}<span class="sc-stamp {{ kind }}">{{ text }}</span>{%- endmacro %}
+
+{% macro erp_seal(paths, tenant, size=168) -%}
+{%- if not tenant -%}{{ seal(paths, "working", _("Not created"), size) }}
+{%- elif tenant.status in ("Reserved", "Provisioning") -%}{{ seal(paths, "working", _("Being set up"), size) }}
+{%- elif tenant.status == "Failed" -%}{{ seal(paths, "stopped", _("Set-up paused"), size) }}
+{%- elif tenant.status == "Suspended" or tenant.read_only -%}{{ seal(paths, "held", _("Read only"), size) }}
+{%- elif tenant.health == "Unreachable" -%}{{ seal(paths, "stopped", _("Not answering"), size) }}
+{%- else -%}{{ seal(paths, "", _("Live"), size) }}{%- endif -%}
+{%- endmacro %}

@@ -1,0 +1,10 @@
+{#- The provisioning job's steps as a sequence (needs `job` and `fmt_dt`). -#}
+<ol class="sc-steps">
+	{% for s in job.steps %}
+	{% set cls = {"Done": "done", "Failed": "failed", "Skipped": "skipped", "Running": "now"}.get(s.status, "") %}
+	<li class="{{ cls }}"><span class="sc-dot">{{ "✓" if s.status == "Done" else ("!" if s.status == "Failed" else loop.index) }}</span>
+		<span class="t"><b>{{ _(s.title) }}</b>
+			<span class="sc-quiet">{% if s.status == "Done" %}{{ _("Done {0}").format(fmt_dt(s.ended_on)) }}{% elif s.status == "Skipped" %}{{ _("Skipped; it does not stop your ERP") }}{% elif s.status == "Failed" %}{{ _("Stopped here; our team finishes it") }}{% elif s.status == "Running" %}{{ _("In progress") }}{% else %}{{ _("Waiting") }}{% endif %}</span></span>
+		<span></span></li>
+	{% endfor %}
+</ol>

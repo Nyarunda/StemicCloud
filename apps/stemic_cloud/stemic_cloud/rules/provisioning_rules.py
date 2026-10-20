@@ -13,6 +13,9 @@ BUSINESS_TYPE = {"Insurance Broker": "Broker", "Insurance Agency": "Agency", "In
 	"Managing General Agent": "Agency", "Insurance Service Provider": "Broker"}
 
 
+APP_TITLE = {"erpnext": "ERPNext", "insurance": "the insurance app"}
+
+
 @dataclass
 class Step:
 	code: str
@@ -31,32 +34,32 @@ def plan(site: str, apps: list[str], admin_email: str, admin_first_name: str, bu
 		host_url: str, health_url: str, reload_web: bool = True) -> list[Step]:
 	"""The provisioning plan for one tenant site."""
 	steps = [
-		Step("reserve", "Reserve the subdomain", "record"),
+		Step("reserve", "Reserve your address", "record"),
 		Step("new_site", "Create the site and its database", "bench", ["new-site", site,
 			"--db-root-password", secret("db_root_password"), "--admin-password", secret("admin_password"),
 			]),
 	]
 	for app in apps:
-		steps.append(Step(f"install_{app}", f"Install {app}", "bench", ["--site", site, "install-app", app]))
+		steps.append(Step(f"install_{app}", f"Install {APP_TITLE.get(app, app)}", "bench", ["--site", site, "install-app", app]))
 	steps += [
-		Step("migrate", "Apply the database migrations", "bench", ["--site", site, "migrate"]),
-		Step("host_name", "Set the site's address", "bench", ["--site", site, "set-config", "host_name", host_url]),
+		Step("migrate", "Bring the database up to date", "bench", ["--site", site, "migrate"]),
+		Step("host_name", "Point the address at it", "bench", ["--site", site, "set-config", "host_name", host_url]),
 		Step("business_type", "Set the insurance business type", "bench", ["--site", site, "execute",
 			"frappe.client.set_value", "--kwargs",
 			'{"doctype": "Insurance Settings", "name": "Insurance Settings", "fieldname": "business_type", "value": "'
 			+ BUSINESS_TYPE.get(business_type, "Broker") + '"}']) if "insurance" in apps else None,
-		Step("admin_user", "Create the organisation's administrator", "bench", ["--site", site, "add-user",
+		Step("admin_user", "Create your administrator login", "bench", ["--site", site, "add-user",
 			admin_email, "--first-name", admin_first_name or "Admin", "--user-type", "System User", "--add-role",
 			"System Manager", *(["--add-role", "Insurance Administrator"] if "insurance" in apps else [])]),
-		Step("scheduler", "Turn on the site's scheduled jobs", "bench", ["--site", site, "enable-scheduler"]),
+		Step("scheduler", "Turn on reminders and daily jobs", "bench", ["--site", site, "enable-scheduler"]),
 		Step("backup", "Take the first backup", "bench", ["--site", site, "backup"], optional=True),
-		Step("web", "Serve the site (nginx)", "bench", ["setup", "nginx", "--yes"], optional=True)
+		Step("web", "Put it on the web", "bench", ["setup", "nginx", "--yes"], optional=True)
 		if reload_web else None,
-		Step("health", "Check the site answers", "http", url=health_url),
-		Step("invite", "Send the administrator a link to set a password", "bench", ["--site", site, "execute",
+		Step("health", "Check that it answers", "http", url=health_url),
+		Step("invite", "Email you a link to set your password", "bench", ["--site", site, "execute",
 			"frappe.core.doctype.user.user.reset_password", "--kwargs", '{"user": "' + admin_email + '"}'],
 			optional=True),
-		Step("activate", "Activate the tenant", "record"),
+		Step("activate", "Open it for use", "record"),
 	]
 	return [s for s in steps if s is not None]
 

@@ -1,33 +1,36 @@
 {% extends "templates/web.html" %}
-{#- The customer portal's frame: brand bar, organisation switcher, the menu on the left. -#}
-{% block title %}{{ title }} · Stemic Insurance{% endblock %}
+{#- The customer portal's frame: the ink bar with the organisation, the folder tabs, one sheet per page. -#}
+{% from "stemic_cloud/templates/cloud/macros.html" import mark %}
+{% block title %}{{ title }}, Stemic Insurance{% endblock %}
 {% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
 {% block page_content %}
 {% include "stemic_cloud/templates/cloud/style.html" %}
 <div class="sc">
-	<header class="sc-bar">
-		<a class="sc-brand" href="/cloud"><span class="sc-logo">S</span>STEMIC INSURANCE</a>
-		<div class="sc-bar-r">
-			{% if orgs|length > 1 %}
-			<select class="sc-input" onchange="location.search='?org='+encodeURIComponent(this.value)">
-				{% for o in orgs %}<option value="{{ o.name }}" {{ 'selected' if o.name == org.name else '' }}>{{ o.org_name }}</option>{% endfor %}
-			</select>{% endif %}
-			<span class="sc-user">{{ full_name }} · {{ _(role) }}</span>
-			<a class="sc-link" href="/?cmd=web_logout">{{ _("Log out") }}</a>
+	<header class="sc-top"><div class="sc-top-in">
+		<div class="sc-top-row">
+			<a class="sc-mark" href="/cloud">{{ mark(rosette) }}<span>Stemic Insurance <small>{{ _("account") }}</small></span></a>
+			<div class="sc-who">
+				{% if orgs|length > 1 %}
+				<label class="sc-hide" for="sc-org">{{ _("Organisation") }}</label>
+				<select id="sc-org" onchange="location.search = '?org=' + encodeURIComponent(this.value)">
+					{% for o in orgs %}<option value="{{ o.name }}" {{ 'selected' if o.name == org.name else '' }}>{{ o.org_name }}</option>{% endfor %}
+				</select>{% else %}<span><b>{{ org.org_name }}</b></span>{% endif %}
+				<span>{{ full_name }}, {{ _(role)|lower }}</span>
+				<a href="/?cmd=web_logout">{{ _("Log out") }}</a>
+			</div>
 		</div>
-	</header>
-	<div class="sc-shell">
-		<nav class="sc-side">
+		<nav class="sc-tabs" aria-label="{{ _('Account') }}">
 			{% for key, label in nav %}
-			<a href="/cloud{{ '/' + key if key else '' }}{{ '?org=' + org.name if orgs|length > 1 else '' }}" class="{{ 'on' if key == page_key else '' }}">{{ _(label) }}</a>
+			<a href="/cloud{{ '/' + key if key else '' }}{{ '?org=' + org.name if orgs|length > 1 else '' }}" class="{{ 'on' if key == page_key else '' }}" {{ 'aria-current="page"' if key == page_key else '' }}>{{ _(label) }}</a>
 			{% endfor %}
-			<div class="sc-side-foot">{% if support_email %}<a href="mailto:{{ support_email }}">{{ _("Support") }}</a>{% endif %}</div>
 		</nav>
-		<main class="sc-main">
-			<div id="sc-notice" class="sc-notice" style="display: none"></div>
-			{% block cloud_content %}{% endblock %}
-		</main>
-	</div>
+	</div></header>
+	<main class="sc-page">
+		<div id="sc-notice" class="sc-note sc-hide" role="status"></div>
+		<div class="sc-sheet">{% block cloud_content %}{% endblock %}</div>
+		<p class="sc-quiet sc-small" style="margin-top: 18px">{% if support_email %}{{ _("Questions about your account:") }} <a href="mailto:{{ support_email }}">{{ support_email }}</a>{% endif %}</p>
+	</main>
 </div>
 {% endblock %}
 {% block script %}
@@ -35,13 +38,18 @@
 <script>
 window.sc = {
 	org: "{{ org.name }}",
-	call(method, args, done) {
-		return frappe.call({ method, args, type: "POST", callback: (r) => { if (!r.exc && done) done(r.message); } });
+	call(method, args, done, button) {
+		if (button) button.disabled = true;
+		return frappe.call({ method, args, type: "POST",
+			callback: (r) => { if (button) button.disabled = false; if (!r.exc && done) done(r.message); },
+			error: () => { if (button) button.disabled = false; } });
 	},
-	notice(text, kind) { const n = document.getElementById("sc-notice"); n.className = "sc-notice " + (kind || "");
-		n.textContent = text; n.style.display = "block"; window.scrollTo(0, 0); },
-	form(id) { const out = {}; document.querySelectorAll("#" + id + " [name]").forEach((el) => { out[el.name] = el.type === "checkbox" ? (el.checked ? 1 : 0) : el.value; }); return out; },
-	toggle(id) { const el = document.getElementById(id); el.style.display = el.style.display === "none" ? "block" : "none"; },
+	notice(text, kind) { const n = document.getElementById("sc-notice"); n.className = "sc-note " + (kind || "");
+		n.textContent = text; window.scrollTo({ top: 0, behavior: "smooth" }); },
+	form(id) { const out = {}; document.querySelectorAll("#" + id + " [name]").forEach((el) => {
+		if (el.type === "radio") { if (el.checked) out[el.name] = el.value; }
+		else out[el.name] = el.type === "checkbox" ? (el.checked ? 1 : 0) : el.value; }); return out; },
+	toggle(id) { document.getElementById(id).classList.toggle("sc-hide"); },
 };
 </script>
 {% endblock %}
