@@ -33,6 +33,12 @@ def settings():
 # ---- who may do what
 
 
+def desk_user():
+	"""The Stemic Cloud desk app is for platform staff; customers have only the portal."""
+	return frappe.session.user != "Guest" and frappe.get_cached_value("User", frappe.session.user,
+		"user_type") == "System User"
+
+
 def membership(organization, user=None):
 	return frappe.db.get_value("Organization Member", {"organization": organization, "user": user or
 		frappe.session.user, "status": "Active"}, ["name", "role"], as_dict=True)

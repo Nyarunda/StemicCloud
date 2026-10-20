@@ -55,6 +55,7 @@ def security():
 			changed = True
 	if changed:
 		s.flags.ignore_permissions = True
+		s.flags.ignore_mandatory = True  # a new site has no language or time zone until its setup wizard
 		s.save()
 
 

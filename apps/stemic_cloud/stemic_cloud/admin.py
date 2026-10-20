@@ -75,7 +75,7 @@ def decide_access(grant, approve, member_role):
 		return
 	t = frappe.get_doc("Tenant", g.tenant)
 	group = frappe.get_doc("Deployment Group", t.deployment_group)
-	local, _sep, domain = g.requested_by.partition("@")
+	local, _sep, domain = (frappe.db.get_value("User", g.requested_by, "email") or "").partition("@")
 	login = f"{local}+{g.name.lower()}@{domain}"
 	if not P.email_safe(login):
 		frappe.throw(_("The requester's address cannot be used on the tenant"))

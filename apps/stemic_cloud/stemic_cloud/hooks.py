@@ -6,7 +6,9 @@ app_email = ""
 app_license = "proprietary"
 
 app_home = "/desk/stemic-cloud"
-add_to_apps_screen = [{"name": app_name, "title": app_title, "route": app_home}]
+# Only desk users see the app: a customer (a website user) logging in is sent to /cloud, not to a desk page refused.
+add_to_apps_screen = [{"name": app_name, "title": app_title, "route": app_home,
+	"has_permission": "stemic_cloud.accounts.desk_user"}]
 
 # Roles, the security defaults, sample plans and a Dry Run deployment group (stemic_cloud/setup/install.py).
 after_install = "stemic_cloud.setup.install.after_install"

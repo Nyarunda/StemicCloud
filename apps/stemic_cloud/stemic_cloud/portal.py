@@ -124,8 +124,10 @@ def invitation(context):
 	except frappe.Redirect:
 		raise
 	except Exception as e:
-		context.update({"error": str(e), "title": _("Invitation")})
+		frappe.db.rollback()
+		context.update({"error": frappe.utils.strip_html(str(e)), "title": _("Invitation")})
 		return
+	frappe.db.commit()  # a GET is not committed by Frappe: the account, membership and acceptance would be lost
 	frappe.local.flags.redirect_location = target
 	raise frappe.Redirect
 

@@ -7,6 +7,7 @@ from frappe.model.document import Document
 
 from stemic_cloud.guards import keep
 from stemic_cloud.rules.access_rules import grant_findings
+from stemic_cloud.rules.provisioning_rules import email_safe
 
 DECIDED = ("tenant", "scope", "hours", "status", "requested_by", "decided_by", "valid_from", "valid_until",
 	"tenant_user")
@@ -30,6 +31,9 @@ class TenantAccessGrant(Document):
 		if frappe.db.get_value("Tenant", self.tenant, "status") not in ("Active", "Suspended"):
 			frappe.throw(_("Access is asked only for a running tenant"))
 		self.organization = frappe.db.get_value("Tenant", self.tenant, "organization")
+		if self.is_new() and not email_safe(frappe.db.get_value("User", frappe.session.user, "email") or ""):
+			# the login made on the tenant is the requester's address with this request's tag
+			frappe.throw(_("Your account needs a plain email address to be given a login on the tenant"))
 		if self.is_new() and frappe.db.exists("Tenant Access Grant", {"tenant": self.tenant, "requested_by":
 				frappe.session.user, "status": ["in", ["Requested", "Approved"]]}):
 			frappe.throw(_("You already have an open request or access for this tenant"))
