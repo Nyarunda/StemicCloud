@@ -1,43 +1,45 @@
 {% extends "stemic_cloud/templates/cloud/base.html" %}
-{% from "stemic_cloud/templates/cloud/macros.html" import stamp, GRANT %}
+{% from "stemic_cloud/templates/cloud/macros.html" import badge, GRANT %}
 {% block cloud_content %}
-<h1>{{ _("Security") }}</h1>
-<p class="sc-lede">{{ _("Your sign-ins, and who at Stemic may open your ERP. Nobody at Stemic has a login on it unless you allow it here.") }}</p>
-
-<section>
-	<h2>{{ _("Stemic support access") }}</h2>
-	{% if grants %}<div class="sc-scroll"><table class="sc-table">
-		<tr><th>{{ _("Asked") }}</th><th>{{ _("Who and why") }}</th><th>{{ _("Access") }}</th><th>{{ _("Standing") }}</th><th></th></tr>
-		{% for g in grants %}<tr>
-			<td class="sc-quiet">{{ fmt_dt(g.creation) }}</td>
-			<td><b>{{ g.requested_by }}</b><br><span class="sc-small">{{ g.reason }}</span></td>
-			<td>{{ _("Read only") if g.scope == "Read Only" else _("Read and change") }}<br><span class="sc-quiet sc-small">{{ _("for {0} hours").format(g.hours) }}</span></td>
-			<td>{{ stamp(_(g.status), GRANT.get(g.status, "")) }}{% if g.status == "Approved" %}<br><span class="sc-quiet sc-small">{{ _("until {0}").format(fmt_dt(g.valid_until)) }}</span>{% endif %}</td>
-			<td class="num">{% if can("approve_access") %}{% if g.status == "Requested" %}<span class="sc-acts" style="justify-content: flex-end">
-				<button class="sc-btn sm go" onclick="sc.call('stemic_cloud.portal.decide_access', {organization: sc.org, grant: '{{ g.name }}', approve: 1}, () => location.reload(), this)">{{ _("Allow") }}</button>
-				<button class="sc-btn sm quiet" onclick="sc.call('stemic_cloud.portal.decide_access', {organization: sc.org, grant: '{{ g.name }}', approve: 0}, () => location.reload(), this)">{{ _("Refuse") }}</button></span>
-				{% elif g.status == "Approved" %}<button class="sc-btn sm stop" onclick="sc.call('stemic_cloud.portal.end_access', {organization: sc.org, grant: '{{ g.name }}'}, () => location.reload(), this)">{{ _("End it now") }}</button>{% endif %}{% endif %}</td></tr>{% endfor %}
+<div class="sc-page-h">
+	<div><h1>{{ _("Security") }}</h1><p>{{ _("Your sign-ins, and who at Stemic may open your ERP. Nobody at Stemic has a login on it unless you allow it here.") }}</p></div>
+</div>
+<div class="sc-sec">
+	<div class="sc-sec-h"><h2>{{ _("Support access to your ERP") }}</h2></div>
+	<div class="sc-card"><div class="sc-card-c">
+	{% if grants %}<div class="sc-tw"><table class="sc-table">
+		<thead><tr><th>{{ _("Who and why") }}</th><th class="md">{{ _("Access") }}</th><th>{{ _("Status") }}</th><th class="md">{{ _("Asked") }}</th><th><span class="sc-hide">{{ _("Actions") }}</span></th></tr></thead>
+		<tbody>{% for g in grants %}<tr>
+			<td><span style="font-weight: 500">{{ g.requested_by }}</span><br><span class="sc-muted sc-xs">{{ g.reason }}</span></td>
+			<td class="md nw">{{ _("Read only") if g.scope == "Read Only" else _("Read and change") }}<br><span class="sc-muted sc-xs">{{ _("for {0} hours").format(g.hours) }}</span></td>
+			<td>{{ badge(_(g.status), GRANT.get(g.status, "")) }}{% if g.status == "Approved" %}<br><span class="sc-muted sc-xs">{{ _("until {0}").format(fmt_dt(g.valid_until)) }}</span>{% endif %}</td>
+			<td class="md sc-muted nw">{{ fmt_dt(g.creation) }}</td>
+			<td class="r">{% if can("approve_access") %}{% if g.status == "Requested" %}<span class="sc-acts" style="justify-content: flex-end; flex-wrap: nowrap">
+				<button class="sc-btn outline sm" onclick="sc.call('stemic_cloud.portal.decide_access', {organization: sc.org, grant: '{{ g.name }}', approve: 0}, () => location.reload(), this)">{{ _("Refuse") }}</button>
+				<button class="sc-btn sm" onclick="sc.call('stemic_cloud.portal.decide_access', {organization: sc.org, grant: '{{ g.name }}', approve: 1}, () => location.reload(), this)">{{ _("Allow") }}</button></span>
+				{% elif g.status == "Approved" %}<button class="sc-btn danger sm" onclick="sc.call('stemic_cloud.portal.end_access', {organization: sc.org, grant: '{{ g.name }}'}, () => location.reload(), this)">{{ _("End now") }}</button>{% endif %}{% endif %}</td></tr>{% endfor %}</tbody>
 	</table></div>
-	{% else %}<p class="sc-clear">{{ _("No requests. When support needs to look inside your ERP, they ask here first.") }}</p>{% endif %}
-</section>
-
-<div class="sc-cols sc-section">
-	<section>
-		<h2>{{ _("Recent sign-ins") }}</h2>
-		{% if logins %}<table class="sc-table">
-			{% for l in logins %}<tr><td class="sc-quiet when">{{ fmt_dt(l.creation) }}</td><td>{{ _("Signed in") if l.operation == "Login" else _("Signed out") }}{% if l.status != "Success" %} {{ stamp(_("failed"), "bad") }}{% endif %}</td><td class="sc-quiet num wide">{{ l.ip_address or "" }}</td></tr>{% endfor %}
-		</table>{% else %}<p class="sc-clear">{{ _("No sign-ins recorded.") }}</p>{% endif %}
-	</section>
-	<section>
-		<h2>{{ _("Your login") }}</h2>
-		<table class="sc-sched">
-			<tr><th>{{ _("Codes at sign-in") }}</th><td>{{ _("On") if two_factor else _("Off for this portal") }}</td></tr>
+	{% else %}<p class="sc-empty">{{ _("No requests. When support needs to look inside your ERP, they ask here first.") }}</p>{% endif %}
+	</div></div>
+</div>
+<div class="sc-grid sc-g3-1">
+	<div class="sc-card">
+		<div class="sc-card-h"><span class="t">{{ _("Recent sign-ins") }}</span><span class="d">{{ _("Your own, on this portal.") }}</span></div>
+		<div class="sc-card-c">{% if logins %}<div class="sc-tw"><table class="sc-table">
+			<thead><tr><th>{{ _("Event") }}</th><th class="md">{{ _("From") }}</th><th class="r">{{ _("When") }}</th></tr></thead>
+			<tbody>{% for l in logins %}<tr><td>{{ _("Signed in") if l.operation == "Login" else _("Signed out") }}{% if l.status != "Success" %} {{ badge(_("Failed"), "bad") }}{% endif %}</td><td class="md sc-muted">{{ l.ip_address or "" }}</td><td class="r sc-muted nw">{{ fmt_dt(l.creation) }}</td></tr>{% endfor %}</tbody>
+		</table></div>{% else %}<p class="sc-empty">{{ _("No sign-ins recorded.") }}</p>{% endif %}</div>
+	</div>
+	<div class="sc-card">
+		<div class="sc-card-h"><span class="t">{{ _("Your login") }}</span><span class="d">{{ _("Password and devices.") }}</span></div>
+		<div class="sc-card-c"><table class="sc-kv">
+			<tr><th>{{ _("Codes at sign-in") }}</th><td>{{ _("On") if two_factor else _("Off") }}</td></tr>
 			<tr><th>{{ _("Signed in on") }}</th><td>{{ _("{0} devices").format(sessions) if sessions is not none else _("Unknown") }}</td></tr>
-		</table>
-		<div class="sc-acts" style="margin-top: 20px">
-			<a class="sc-btn" href="/update-password">{{ _("Change password") }}</a>
-			<button class="sc-btn quiet" onclick="sc.call('stemic_cloud.portal.sign_out_elsewhere', {}, () => sc.notice('{{ _('You are signed out everywhere else.') }}', 'good'), this)">{{ _("Sign out everywhere else") }}</button>
+		</table></div>
+		<div class="sc-card-f">
+			<a class="sc-btn outline sm" href="/update-password">{{ _("Change password") }}</a>
+			<button class="sc-btn ghost sm" onclick="sc.call('stemic_cloud.portal.sign_out_elsewhere', {}, () => sc.notice('{{ _('You are signed out everywhere else.') }}', 'good'), this)">{{ _("Sign out everywhere else") }}</button>
 		</div>
-	</section>
+	</div>
 </div>
 {% endblock %}

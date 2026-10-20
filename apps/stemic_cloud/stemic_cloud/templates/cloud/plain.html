@@ -7,12 +7,10 @@
 {% block page_content %}
 {% include "stemic_cloud/templates/cloud/style.html" %}
 <div class="sc">
-	<header class="sc-top"><div class="sc-top-in" style="padding-bottom: 14px">
-		<div class="sc-top-row">
-			<a class="sc-mark" href="/register">{{ mark(rosette) }}<span>Stemic Insurance</span></a>
-			<div class="sc-who"><a href="/login?redirect-to=/cloud">{{ _("Log in") }}</a></div>
-		</div>
-	</div></header>
-	<main class="sc-page">{% block plain_content %}{% endblock %}</main>
+	<header class="sc-head" style="padding: 0 max(24px, calc((100% - 1104px) / 2))">
+		<a class="sc-side-brand" style="padding: 0" href="/register">{{ mark(rosette) }}<span>Stemic Insurance</span></a>
+		<a class="sc-btn outline sm" href="/login?redirect-to=/cloud">{{ _("Log in") }}</a>
+	</header>
+	<main class="sc-content" style="max-width: 1152px">{% block plain_content %}{% endblock %}</main>
 </div>
 {% endblock %}

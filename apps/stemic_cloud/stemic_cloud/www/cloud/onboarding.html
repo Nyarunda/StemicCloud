@@ -1,17 +1,26 @@
 {% extends "stemic_cloud/templates/cloud/base.html" %}
+{% from "stemic_cloud/templates/cloud/macros.html" import icon %}
 {% block cloud_content %}
-<h1>{{ _("Set-up guide") }}</h1>
-<p class="sc-lede">{{ _("{0} things to do in your ERP before you write your first policy. Each step opens the right screen in the ERP; mark it done here when you have finished it.").format(steps|length) }}</p>
 {% set ready = tenant and tenant.status == "Active" %}
-{% if not ready %}<div class="sc-note">{{ _("Your ERP is still being built. The steps open as soon as it is ready.") }}</div>{% endif %}
-<div class="sc-progress"><b>{{ progress }}%</b><span class="sc-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"><i style="width: {{ progress }}%"></i></span><span class="sc-quiet">{{ _("{0} of {1} done").format(steps|selectattr("done")|list|length, steps|length) }}</span></div>
+{% set done_n = steps|selectattr("done")|list|length %}
 {% set next_code = (steps | rejectattr("done") | first or {}).code %}
-<ol class="sc-steps">
-	{% for s in steps %}
-	<li class="{{ 'done' if s.done else ('now' if s.code == next_code else '') }}"><span class="sc-dot">{{ "✓" if s.done else loop.index }}</span>
-		<span class="t"><b>{{ _(s.title) }}</b>{% if s.code == next_code %}<span class="sc-quiet">{{ _("Next") }}</span>{% endif %}</span>
-		<span class="a">{% if ready %}<a class="sc-btn sm {{ 'go' if s.code == next_code else 'quiet' }}" href="{{ s.url }}" target="_blank" rel="noopener">{{ _("Open in the ERP") }}</a>{% endif %}
-			{% if can("onboarding") %}<button class="sc-btn sm quiet" onclick="sc.call('stemic_cloud.portal.mark_step', {organization: sc.org, code: '{{ s.code }}', done: {{ 0 if s.done else 1 }}}, () => location.reload(), this)">{{ _("Mark not done") if s.done else _("Mark done") }}</button>{% endif %}</span></li>
-	{% endfor %}
-</ol>
+<div class="sc-page-h">
+	<div><h1>{{ _("Set-up guide") }}</h1><p>{{ _("{0} things to do in your ERP before your first policy. Each opens the right screen in the ERP; mark it done here.").format(steps|length) }}</p></div>
+	{% if ready %}<a class="sc-btn" href="{{ tenant.url }}" target="_blank" rel="noopener">{{ icon("open") }}{{ _("Open your ERP") }}</a>{% endif %}
+</div>
+{% if not ready %}<div class="sc-note">{{ _("Your ERP is still being built. The steps open as soon as it is ready.") }}</div>{% endif %}
+<div class="sc-card">
+	<div class="sc-card-h"><span class="t">{{ _("{0} of {1} done").format(done_n, steps|length) }}</span><span class="d">{{ _("{0}% of your set-up").format(progress) }}</span></div>
+	<div class="sc-card-c">
+		<div class="sc-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="margin-bottom: 20px"><i style="width: {{ progress }}%"></i></div>
+		<ol class="sc-steps">
+			{% for s in steps %}
+			<li class="{{ 'done' if s.done else ('now' if s.code == next_code else '') }}"><span class="sc-dot">{{ "✓" if s.done else loop.index }}</span>
+				<span class="t"><b>{{ _(s.title) }}</b><span class="sc-muted">{{ _("Done") if s.done else (_("Next") if s.code == next_code else _("To do")) }}</span></span>
+				<span class="sc-acts">{% if ready %}<a class="sc-btn sm {{ '' if s.code == next_code else 'outline' }}" href="{{ s.url }}" target="_blank" rel="noopener">{{ _("Open in the ERP") }}</a>{% endif %}
+					{% if can("onboarding") %}<button class="sc-btn sm ghost" onclick="sc.call('stemic_cloud.portal.mark_step', {organization: sc.org, code: '{{ s.code }}', done: {{ 0 if s.done else 1 }}}, () => location.reload(), this)">{{ _("Mark not done") if s.done else _("Mark done") }}</button>{% endif %}</span></li>
+			{% endfor %}
+		</ol>
+	</div>
+</div>
 {% endblock %}

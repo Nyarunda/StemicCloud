@@ -1,101 +1,82 @@
 {% extends "stemic_cloud/templates/cloud/plain.html" %}
 {% from "stemic_cloud/templates/cloud/macros.html" import seal %}
 {% block plain_content %}
-<div class="sc-reg-hero">
-	<div>
-		<h1>{{ _("Your insurance office, on its own address") }}</h1>
-		<p class="sc-lede">{{ _("Quotations, policies, renewals, commissions and accounts for brokers, agencies and insurers in one ERP. Choose a plan, tell us about the company, and we build it for you in a few minutes.") }}</p>
-	</div>
-	{{ seal(rosette, "", "", 200) }}
+<div class="sc-page-h" style="margin-top: 16px">
+	<div><h1>{{ _("Open an account") }}</h1><p>{{ _("An insurance ERP for brokers, agencies and insurers, on its own address. Choose a plan and tell us about the company; we build it in a few minutes.") }}</p></div>
 </div>
 <div id="sc-notice" class="sc-note sc-hide" role="alert"></div>
 
-<div id="reg" class="sc-sheet">
-	<ol class="sc-form-steps">
-	<li>
-		<h2>{{ _("Choose a plan") }}</h2>
-		{% if plans %}
-		<div class="sc-scroll"><table class="sc-cover">
-			<thead><tr><th></th>{% for p in plans %}<th class="{{ 'off' if p.contact_sales else '' }}">
-				<label><input type="radio" name="plan" value="{{ p.name }}" {{ 'disabled' if p.contact_sales else '' }} {{ 'checked' if (wanted == p.name) or (not wanted and loop.index == 2 and not p.contact_sales) else '' }}>
-				<span class="n">{{ p.plan_name }}</span>
-				<span class="p">{% if p.contact_sales %}{{ _("By agreement") }}<small>&nbsp;</small>{% else %}{{ money(p.monthly_price, p.currency) }}<small>{{ _("a month") }}</small>{% endif %}</span>
-				<span class="d">{{ p.description or "" }}</span></label></th>{% endfor %}</tr></thead>
-			<tbody>
-				<tr><th>{{ _("ERP users") }}</th>{% for p in plans %}<td>{{ p.max_users or _("By agreement") }}</td>{% endfor %}</tr>
-				<tr><th>{{ _("Free trial") }}</th>{% for p in plans %}<td>{{ _("{0} days").format(p.trial) if p.trial and not p.contact_sales else "None" }}</td>{% endfor %}</tr>
-				{% set feats = [] %}{% for p in plans|reverse %}{% for f in p.features %}{% if f.feature not in feats %}{% do feats.append(f.feature) %}{% endif %}{% endfor %}{% endfor %}
-				{% for name in feats %}<tr><th>{{ name }}</th>{% for p in plans %}{% set v = (p.features | selectattr("feature", "equalto", name) | first or {}).value %}
-					<td>{% if v == "Yes" %}<span class="yes" aria-label="{{ _('Included') }}">✓</span>{% elif not v or v == "No" %}<span class="no" aria-label="{{ _('Not included') }}">–</span>{% else %}{{ v }}{% endif %}</td>{% endfor %}</tr>{% endfor %}
-				<tr><th></th>{% for p in plans %}<td>{% if p.contact_sales and support_email %}<a class="sc-btn sm quiet" href="mailto:{{ support_email }}?subject={{ p.plan_name }}">{{ _("Talk to us") }}</a>{% endif %}</td>{% endfor %}</tr>
-			</tbody>
-		</table></div>
-		<div class="sc-acts" style="margin-top: 14px; gap: 22px">
-			<label class="sc-check" style="margin: 0"><input type="radio" name="billing_cycle" value="Monthly" checked> {{ _("Billed monthly") }}</label>
-			<label class="sc-check" style="margin: 0"><input type="radio" name="billing_cycle" value="Annual"> {{ _("Billed yearly, two months free") }}</label>
+<div id="reg" class="sc-grid" style="gap: 16px">
+	<div class="sc-sec">
+		<div class="sc-sec-h"><h2>{{ _("Plan") }}</h2>
+			<span class="sc-acts" style="gap: 16px">
+				<label class="sc-check"><input type="radio" name="billing_cycle" value="Monthly" checked> {{ _("Monthly") }}</label>
+				<label class="sc-check"><input type="radio" name="billing_cycle" value="Annual"> {{ _("Yearly, two months free") }}</label></span></div>
+		{% if plans %}<div class="sc-grid sc-plans">
+			{% for p in plans %}<label class="sc-card sc-plan {{ 'off' if p.contact_sales else '' }}">
+				<div class="sc-card-h"><span class="t">{{ p.plan_name }}</span><span class="d">{{ p.description or "" }}</span>
+					<span class="a"><input type="radio" name="plan" value="{{ p.name }}" {{ 'disabled' if p.contact_sales else '' }} {{ 'checked' if (wanted == p.name) or (not wanted and loop.index == 2 and not p.contact_sales) else '' }} aria-label="{{ p.plan_name }}"></span></div>
+				<div class="sc-card-c">
+					<div class="sc-big" style="margin-bottom: 4px">{% if p.contact_sales %}{{ _("Custom") }}{% else %}{{ money(p.monthly_price, p.currency) }}<span class="sc-muted" style="font-size: var(--sm); font-weight: 400; letter-spacing: 0">{{ _("/ month") }}</span>{% endif %}</div>
+					<p class="sc-muted">{{ _("{0} ERP users").format(p.max_users) if p.max_users else _("Users by agreement") }}{% if p.trial and not p.contact_sales %}, {{ _("{0}-day free trial").format(p.trial) }}{% endif %}</p>
+					<ul class="sc-feat">{% for f in p.features %}<li class="{{ 'no' if f.value == 'No' else '' }}">{{ f.feature }}{% if f.value not in ("Yes", "No") %}: {{ f.value }}{% endif %}</li>{% endfor %}</ul>
+				</div>
+				{% if p.contact_sales and support_email %}<div class="sc-card-f"><a class="sc-btn outline sm" href="mailto:{{ support_email }}?subject={{ p.plan_name }}">{{ _("Talk to us") }}</a></div>{% endif %}
+			</label>{% endfor %}
+		</div>{% else %}<div class="sc-card"><div class="sc-card-c"><p class="sc-empty">{{ _("No plans are open yet. Write to us to open an account.") }}</p></div></div>{% endif %}
+	</div>
+
+	<div class="sc-grid sc-g2">
+		<div class="sc-card">
+			<div class="sc-card-h"><span class="t">{{ _("The company") }}</span><span class="d">{{ _("As it appears on its licence.") }}</span></div>
+			<div class="sc-card-c sc-fields">
+				<div class="sc-field"><label class="f" for="org_name">{{ _("Company name") }}</label><input class="sc-in" id="org_name" name="org_name" autocomplete="organization" required></div>
+				<div class="sc-fields two">
+					<div class="sc-field"><label class="f" for="org_type">{{ _("Type of business") }}</label><select class="sc-in" id="org_type" name="org_type">{% for t in org_types %}<option>{{ t }}</option>{% endfor %}</select></div>
+					<div class="sc-field"><label class="f" for="regno">{{ _("IRA licence number") }} <span class="sc-muted" style="font-weight: 400">{{ _("optional") }}</span></label><input class="sc-in" id="regno" name="registration_number"></div>
+					<div class="sc-field"><label class="f" for="country">{{ _("Country") }}</label><input class="sc-in" id="country" name="country" value="Kenya"></div>
+					<div class="sc-field"><label class="f" for="currency">{{ _("Currency") }}</label><input class="sc-in" id="currency" name="currency" value="KES"></div>
+				</div>
+				<div class="sc-field"><label class="f" for="subdomain">{{ _("ERP address") }}</label>
+					<div class="sc-addr"><input id="subdomain" name="subdomain" autocomplete="off" spellcheck="false" aria-describedby="sub-msg"><span>.{{ root_domain }}</span></div>
+					<div id="sub-msg" class="sc-hint" aria-live="polite">{{ _("Letters, digits and dashes. We suggest one from the company name.") }}</div></div>
+			</div>
 		</div>
-		{% else %}<p class="sc-clear">{{ _("No plans are open yet. Write to us to open an account.") }}</p>{% endif %}
-	</li>
-	<li>
-		<h2>{{ _("The company") }}</h2>
-		<div class="sc-two">
-			<div><label class="f" for="org_name">{{ _("Company name") }}</label><input class="sc-in" id="org_name" name="org_name" autocomplete="organization" required></div>
-			<div><label class="f" for="org_type">{{ _("Type of business") }}</label><select class="sc-in" id="org_type" name="org_type">{% for t in org_types %}<option>{{ t }}</option>{% endfor %}</select></div>
-			<div><label class="f" for="regno">{{ _("IRA licence or registration number") }} <span class="sc-quiet">{{ _("optional") }}</span></label><input class="sc-in" id="regno" name="registration_number"></div>
-			<div class="sc-two" style="gap: 12px"><div><label class="f" for="country">{{ _("Country") }}</label><input class="sc-in" id="country" name="country" value="Kenya"></div>
-				<div><label class="f" for="currency">{{ _("Currency") }}</label><input class="sc-in" id="currency" name="currency" value="KES"></div></div>
+		<div class="sc-card">
+			<div class="sc-card-h"><span class="t">{{ _("You") }}</span><span class="d">{{ _("The owner of the account and first administrator of the ERP.") }}</span></div>
+			<div class="sc-card-c sc-fields">
+				<div class="sc-field"><label class="f" for="full_name">{{ _("Full name") }}</label><input class="sc-in" id="full_name" name="full_name" autocomplete="name" required></div>
+				<div class="sc-fields two">
+					<div class="sc-field"><label class="f" for="email">{{ _("Work email") }}</label><input class="sc-in" type="email" id="email" name="email" autocomplete="email" required></div>
+					<div class="sc-field"><label class="f" for="phone">{{ _("Phone") }} <span class="sc-muted" style="font-weight: 400">{{ _("optional") }}</span></label><input class="sc-in" id="phone" name="phone" autocomplete="tel" placeholder="+254 7"></div>
+				</div>
+				<label class="sc-check"><input type="checkbox" name="accept_terms"><span>{{ _("I accept the") }} {% if terms_url %}<a href="{{ terms_url }}" target="_blank" rel="noopener" style="text-decoration: underline">{{ _("terms of service") }}</a>{% else %}{{ _("terms of service") }}{% endif %}.</span></label>
+			</div>
+			<div class="sc-card-f"><button class="sc-btn" id="go">{{ _("Create the account") }}</button>
+				<span class="sc-muted sc-xs">{{ _("We email you a link to confirm the address.") }}</span></div>
 		</div>
-		<label class="f" for="subdomain">{{ _("Your ERP's address") }}</label>
-		<div class="sc-addr"><input id="subdomain" name="subdomain" autocomplete="off" spellcheck="false" aria-describedby="sub-msg"><span>.{{ root_domain }}</span></div>
-		<div id="sub-msg" class="sc-hint" aria-live="polite">{{ _("Letters, digits and dashes. We suggest one from the company name.") }}</div>
-	</li>
-	<li>
-		<h2>{{ _("You") }}</h2>
-		<div class="sc-two">
-			<div><label class="f" for="full_name">{{ _("Full name") }}</label><input class="sc-in" id="full_name" name="full_name" autocomplete="name" required></div>
-			<div><label class="f" for="email">{{ _("Work email") }}</label><input class="sc-in" type="email" id="email" name="email" autocomplete="email" required></div>
-			<div><label class="f" for="phone">{{ _("Phone") }} <span class="sc-quiet">{{ _("optional") }}</span></label><input class="sc-in" id="phone" name="phone" autocomplete="tel" placeholder="+254 7"></div>
-		</div>
-		<p class="sc-quiet sc-small" style="margin-top: 14px">{{ _("You become the owner of the account and the first administrator of the ERP. We email you a link to confirm the address; then you choose your password.") }}</p>
-		<label class="sc-check"><input type="checkbox" name="accept_terms"><span>{{ _("I accept the") }} {% if terms_url %}<a href="{{ terms_url }}" target="_blank" rel="noopener">{{ _("terms of service") }}</a>{% else %}{{ _("terms of service") }}{% endif %}.</span></label>
-		<button class="sc-btn go big" id="go" style="margin-top: 22px">{{ _("Create the account") }}</button>
-	</li>
-	</ol>
+	</div>
 </div>
 
-<div id="sent" class="sc-sheet sc-hide" style="max-width: 640px; margin: 0 auto; text-align: center">
-	<div style="display: grid; place-items: center; margin-bottom: 14px">{{ seal(rosette, "working", _("Check your email"), 150) }}</div>
-	<h2 style="font-size: var(--f2)">{{ _("One more step") }}</h2>
-	<p id="sent-text" style="margin: 0 auto"></p>
+<div id="sent" class="sc-card sc-hide" style="max-width: 520px; margin: 40px auto; text-align: center">
+	<div class="sc-card-c" style="display: grid; place-items: center; gap: 12px">
+		{{ seal(rosette, "working", "", 96) }}
+		<div class="t" style="font-size: var(--lg); font-weight: 500">{{ _("Check your email") }}</div>
+		<p id="sent-text" class="sc-muted"></p>
+	</div>
 </div>
 <style>
-	.sc-reg-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: center; margin: 12px 0 30px; }
-	.sc-reg-hero h1 { font-size: clamp(2rem, 4.6vw, 3.25rem); max-width: 16ch; }
-	.sc-reg-hero .sc-lede { margin-bottom: 0; }
-	@media (max-width: 720px) { .sc-reg-hero { grid-template-columns: 1fr; } .sc-reg-hero .sc-seal { display: none; } }
-	.sc-form-steps { list-style: none; margin: 0; padding: 0; counter-reset: part; }
-	.sc-form-steps > li { counter-increment: part; position: relative; padding: 0 0 36px 52px; }
-	.sc-form-steps > li + li { padding-top: 32px; border-top: 1px solid var(--rule-2); }
-	.sc-form-steps > li::before { content: counter(part); position: absolute; left: 0; width: 34px; height: 34px; border-radius: 50%;
-		background: var(--ink); color: var(--on-ink); display: grid; place-items: center; font-weight: 800; }
-	.sc-form-steps > li + li::before { top: 30px; }
-	.sc-form-steps > li > h2 { font-size: var(--f2); border: 0; padding: 4px 0 0; margin-bottom: 14px; }
-	@media (max-width: 620px) { .sc-form-steps > li { padding-left: 0; } .sc-form-steps > li::before { position: static; margin-bottom: 10px; } }
-	.sc-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
-	@media (max-width: 620px) { .sc-two { grid-template-columns: 1fr; } }
-	.sc-cover { width: 100%; border-collapse: collapse; min-width: 560px; }
-	.sc-cover th, .sc-cover td { padding: 10px 14px; border-bottom: 1px solid var(--rule-2); text-align: left; vertical-align: top; }
-	.sc-cover tbody th { font-weight: 500; color: var(--ink-2); width: 30%; padding-left: 0; }
-	.sc-cover thead th { vertical-align: bottom; border-bottom: 2px solid var(--ink); padding: 0 6px 12px; }
-	.sc-cover thead label { display: block; cursor: pointer; padding: 14px 12px 12px; border-radius: 6px; border: 1.5px solid transparent; }
-	.sc-cover thead th:has(input:checked) label { border-color: var(--ink); background: var(--rule-2); }
-	.sc-cover thead th.off label { cursor: default; }
-	.sc-cover thead input { accent-color: var(--ink); margin: 0 0 8px; }
-	.sc-cover .n { display: block; font-size: var(--f1); font-weight: 800; }
-	.sc-cover .p { display: block; font-size: var(--f2); font-weight: 800; letter-spacing: -.02em; margin: 2px 0 4px; }
-	.sc-cover .p small { display: block; font-size: var(--f-1); font-weight: 500; color: var(--ink-2); letter-spacing: 0; }
-	.sc-cover .d { display: block; font-size: var(--f-1); font-weight: 400; color: var(--ink-2); }
-	.sc-cover .yes { color: var(--seal); font-weight: 800; } .sc-cover .no { color: var(--ink-2); }
+	.sc-plans { grid-template-columns: 1fr; }
+	@media (min-width: 900px) { .sc-plans { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+	.sc-plan { cursor: pointer; }
+	.sc-plan:has(input:checked) { box-shadow: 0 0 0 2px var(--primary); }
+	.sc-plan.off { cursor: default; }
+	.sc-plan input { accent-color: var(--primary); width: 16px; height: 16px; margin: 4px 0 0; }
+	.sc-feat { list-style: none; margin: 14px 0 0; padding: 14px 0 0; border-top: 1px solid var(--border); display: grid; gap: 8px; }
+	.sc-feat li { padding-left: 22px; position: relative; }
+	.sc-feat li::before { content: "✓"; position: absolute; left: 2px; color: var(--seal); font-weight: 600; }
+	.sc-feat li.no { color: var(--muted-fg); text-decoration: line-through; }
+	.sc-feat li.no::before { content: "–"; color: var(--muted-fg); }
 </style>
 {% endblock %}
 {% block script %}
@@ -103,8 +84,7 @@
 <script>
 frappe.ready(() => {
 	const $ = (s) => document.querySelector(s), sub = $("#subdomain"), msg = $("#sub-msg");
-	const notice = (t) => { const n = $("#sc-notice"); n.className = "sc-note bad"; n.innerHTML = t; window.scrollTo({ top: 0, behavior: "smooth" }); };
-	const slug = (v) => v.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30);
+		const slug = (v) => v.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30);
 	let typed = false, timer;
 	$("#org_name").addEventListener("input", (e) => { if (!typed) { sub.value = slug(e.target.value); check(); } });
 	sub.addEventListener("input", () => { typed = true; check(); });
@@ -126,7 +106,7 @@ frappe.ready(() => {
 		frappe.call({ method: "stemic_cloud.accounts.register", args, type: "POST",
 			callback: (r) => { go.disabled = false; if (r.exc) return;
 				$("#reg").classList.add("sc-hide"); $("#sc-notice").className = "sc-note sc-hide";
-				document.querySelector(".sc-reg-hero").classList.add("sc-hide");
+				document.querySelector(".sc-page-h").classList.add("sc-hide");
 				$("#sent").classList.remove("sc-hide"); $("#sent-text").textContent = r.message.message; },
 			error: () => { go.disabled = false; } });
 	});

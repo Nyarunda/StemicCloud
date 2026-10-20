@@ -1,30 +1,68 @@
-{#- The seal (a guilloche rosette, the ERP's state) and the stamp (a status). `rosette` comes from portal.base. -#}
-{% macro seal(paths, kind, word, size=168) -%}
+{#- Icons (lucide outlines), the badge (a status), and the seal (a guilloche rosette, the ERP's state).
+    `rosette` comes from portal.base. -#}
+{%- set ICONS = {
+	"home": '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+	"erp": '<rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/>',
+	"billing": '<rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>',
+	"team": '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+	"onboarding": '<path d="m3 17 2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8"/>',
+	"security": '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+	"out": '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+	"open": '<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+	"panel": '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
+	"mail": '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+	"plus": '<path d="M5 12h14M12 5v14"/>',
+	"users": '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
+	"wallet": '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+	"plan": '<path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>',
+	"activity": '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+} -%}
+{% macro icon(name) -%}<svg class="i" viewBox="0 0 24 24" aria-hidden="true">{{ ICONS[name] | safe }}</svg>{%- endmacro %}
+
+{% macro seal(paths, kind, word, size=112) -%}
 <div class="sc-seal {{ kind }}" style="width: {{ size }}px; height: {{ size }}px">
 	<svg viewBox="0 0 200 200" aria-hidden="true">
-		<path d="{{ paths[0] }}" stroke-width=".35" opacity=".85"/>
-		<path d="{{ paths[1] }}" stroke-width=".4" opacity=".6"/>
-		<path d="{{ paths[2] }}" stroke-width=".4"/>
-		<path d="{{ paths[3] }}" stroke-width=".5" opacity=".9"/>
+		<path d="{{ paths[0] }}" stroke-width=".5" opacity=".85"/>
+		<path d="{{ paths[1] }}" stroke-width=".55" opacity=".6"/>
+		<path d="{{ paths[2] }}" stroke-width=".55"/>
+		<path d="{{ paths[3] }}" stroke-width=".7" opacity=".9"/>
 	</svg>
 	{% if word %}<div class="w"><span>{{ word }}</span></div>{% endif %}
 </div>
 {%- endmacro %}
 
 {% macro mark(paths) -%}
-<svg viewBox="0 0 200 200" aria-hidden="true"><path d="{{ paths[2] }}" fill="none" stroke="currentColor" stroke-width="5"/></svg>
+<svg viewBox="0 0 200 200" aria-hidden="true"><path d="{{ paths[2] }}" fill="none" stroke="currentColor" stroke-width="6"/></svg>
 {%- endmacro %}
 
 {%- set SUB = {"Active": "good", "Trial": "info", "Past Due": "warn", "Grace": "warn", "Suspended": "bad", "Cancelled": "bad"} -%}
-{%- set INV = {"Paid": "good", "Issued": "warn", "Void": ""} -%}
-{%- set GRANT = {"Approved": "good", "Requested": "info", "Rejected": "bad"} -%}
-{% macro stamp(text, kind="") -%}<span class="sc-stamp {{ kind }}">{{ text }}</span>{%- endmacro %}
+{%- set INV = {"Paid": "good", "Issued": "warn", "Void": "outline"} -%}
+{%- set GRANT = {"Approved": "good", "Requested": "info", "Rejected": "bad", "Expired": "outline", "Revoked": "outline"} -%}
+{% macro badge(text, kind="") -%}<span class="sc-badge {{ kind }}">{{ text }}</span>{%- endmacro %}
 
-{% macro erp_seal(paths, tenant, size=168) -%}
+{% macro erp_seal(paths, tenant, size=112) -%}
 {%- if not tenant -%}{{ seal(paths, "working", _("Not created"), size) }}
 {%- elif tenant.status in ("Reserved", "Provisioning") -%}{{ seal(paths, "working", _("Being set up"), size) }}
 {%- elif tenant.status == "Failed" -%}{{ seal(paths, "stopped", _("Set-up paused"), size) }}
 {%- elif tenant.status == "Suspended" or tenant.read_only -%}{{ seal(paths, "held", _("Read only"), size) }}
 {%- elif tenant.health == "Unreachable" -%}{{ seal(paths, "stopped", _("Not answering"), size) }}
 {%- else -%}{{ seal(paths, "", _("Live"), size) }}{%- endif -%}
+{%- endmacro %}
+
+{% macro erp_badge(tenant) -%}
+{%- if not tenant -%}{{ badge(_("Not created"), "outline") }}
+{%- elif tenant.status in ("Reserved", "Provisioning") -%}{{ badge(_("Being set up"), "outline") }}
+{%- elif tenant.status == "Failed" -%}{{ badge(_("Set-up paused"), "bad") }}
+{%- elif tenant.status == "Suspended" or tenant.read_only -%}{{ badge(_("Read only"), "warn") }}
+{%- elif tenant.health == "Unreachable" -%}{{ badge(_("Not answering"), "bad") }}
+{%- else -%}{{ badge(_("Live"), "good") }}{%- endif -%}
+{%- endmacro %}
+
+{% macro erp_word(tenant) -%}
+{%- if not tenant -%}<div class="sc-big none">{{ _("Not created") }}</div>
+{%- elif tenant.status in ("Reserved", "Provisioning") -%}<div class="sc-big none">{{ _("Being set up") }}</div>
+{%- elif tenant.status == "Failed" -%}<div class="sc-big bad">{{ _("Paused") }}</div>
+{%- elif tenant.status == "Suspended" or tenant.read_only -%}<div class="sc-big warn">{{ _("Read only") }}</div>
+{%- elif tenant.health == "Unreachable" -%}<div class="sc-big bad">{{ _("Not answering") }}</div>
+{%- else -%}<div class="sc-big good">{{ _("Live") }}</div>{%- endif -%}
 {%- endmacro %}

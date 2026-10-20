@@ -1,32 +1,35 @@
 {% extends "stemic_cloud/templates/cloud/base.html" %}
-{% from "stemic_cloud/templates/cloud/macros.html" import erp_seal, stamp %}
+{% from "stemic_cloud/templates/cloud/macros.html" import erp_seal, erp_badge, icon %}
 {% block cloud_content %}
-<h1>{{ _("Your ERP") }}</h1>
-<p class="sc-lede">{{ _("Where your insurance ERP runs and how it is doing. Who can use it is decided inside the ERP, by its own users and roles.") }}</p>
+<div class="sc-page-h">
+	<div><h1>{{ _("Your ERP") }}</h1><p>{{ _("Where your insurance ERP runs and how it is doing. Who can use it is decided inside the ERP.") }}</p></div>
+	{% if tenant and tenant.status in ("Active", "Suspended") %}<div class="sc-acts">
+		<a class="sc-btn outline" href="{{ tenant.url }}/app/user" target="_blank" rel="noopener">{{ icon("users") }}{{ _("Manage ERP users") }}</a>
+		<a class="sc-btn" href="{{ tenant.url }}" target="_blank" rel="noopener">{{ icon("open") }}{{ _("Open your ERP") }}</a></div>{% endif %}
+</div>
 {% if not tenant %}
-<p class="sc-clear">{{ _("There is no ERP on this account yet. Write to us and we will set it up.") }}</p>
+<div class="sc-card"><div class="sc-card-c"><p class="sc-empty">{{ _("There is no ERP on this account yet. Write to support and we will set it up.") }}</p></div></div>
 {% else %}
-<div class="sc-cols">
-	<section>
-		<h2>{{ _("The environment") }}</h2>
-		<table class="sc-sched">
-			<tr><th>{{ _("Address") }}</th><td><a href="{{ tenant.url }}" target="_blank" rel="noopener">{{ tenant.site_name }}</a></td></tr>
-			<tr><th>{{ _("State") }}</th><td>{{ stamp(_(tenant.status), {"Active": "good", "Failed": "bad", "Suspended": "warn"}.get(tenant.status, "info")) }}{% if tenant.read_only %} {{ stamp(_("Read only"), "warn") }}{% endif %}</td></tr>
-			<tr><th>{{ _("Answering") }}</th><td>{% if tenant.health == "Healthy" %}{{ _("Yes") }}{% elif tenant.health == "Unreachable" %}<span style="color: var(--red)">{{ _("No") }}</span>{% else %}{{ _("Not checked yet") }}{% endif %}{% if tenant.last_health_check %} <span class="sc-quiet">{{ _("at {0}").format(fmt_dt(tenant.last_health_check)) }}</span>{% endif %}</td></tr>
-			<tr><th>{{ _("Version") }}</th><td>{{ tenant.app_version or _("Not read yet") }}</td></tr>
-			<tr><th>{{ _("Last backup") }}</th><td>{{ fmt_dt(tenant.last_backup_on) or _("None yet") }}</td></tr>
-			<tr><th>{{ _("First administrator") }}</th><td>{{ tenant.admin_email }}</td></tr>
-		</table>
-		<div class="sc-acts" style="margin-top: 22px">
-			{% if tenant.status in ("Active", "Suspended") %}<a class="sc-btn go" href="{{ tenant.url }}" target="_blank" rel="noopener">{{ _("Open your ERP") }}</a>
-			<a class="sc-btn" href="{{ tenant.url }}/app/user" target="_blank" rel="noopener">{{ _("Manage ERP users") }}</a>{% endif %}
-			{% if can("request_export") %}<button class="sc-btn quiet" onclick="sc.call('stemic_cloud.portal.request_export', {organization: sc.org}, (m) => sc.notice(m, 'good'), this)">{{ _("Ask for a copy of your data") }}</button>{% endif %}
+<div class="sc-grid sc-g2">
+	<div class="sc-card">
+		<div class="sc-card-h"><span class="t">{{ _("Environment") }}</span><span class="d">{{ tenant.site_name }}</span><span class="a">{{ erp_badge(tenant) }}</span></div>
+		<div class="sc-card-c sc-erp" style="align-items: flex-start">
+			{{ erp_seal(rosette, tenant, 96) }}
+			<table class="sc-kv">
+				<tr><th>{{ _("Address") }}</th><td><a href="{{ tenant.url }}" target="_blank" rel="noopener">{{ tenant.url }}</a></td></tr>
+				<tr><th>{{ _("Answering") }}</th><td>{% if tenant.health == "Healthy" %}{{ _("Yes") }}{% elif tenant.health == "Unreachable" %}<span style="color: var(--red)">{{ _("No") }}</span>{% else %}{{ _("Not checked yet") }}{% endif %}{% if tenant.last_health_check %} <span class="sc-muted" style="font-weight: 400">{{ fmt_dt(tenant.last_health_check) }}</span>{% endif %}</td></tr>
+				<tr><th>{{ _("Version") }}</th><td>{{ tenant.app_version or _("Not read yet") }}</td></tr>
+				<tr><th>{{ _("Last backup") }}</th><td>{{ fmt_dt(tenant.last_backup_on) or _("None yet") }}</td></tr>
+				<tr><th>{{ _("First administrator") }}</th><td>{{ tenant.admin_email }}</td></tr>
+			</table>
 		</div>
-	</section>
-	<section>
-		<h2>{{ _("How it was built") }}</h2>
-		{% if job %}{% include "stemic_cloud/templates/cloud/job_steps.html" %}{% else %}<p class="sc-clear">{{ _("No record of the set-up.") }}</p>{% endif %}
-	</section>
+		{% if can("request_export") %}<div class="sc-card-f"><button class="sc-btn outline sm" onclick="sc.call('stemic_cloud.portal.request_export', {organization: sc.org}, (m) => sc.notice(m, 'good'), this)">{{ _("Ask for a copy of your data") }}</button>
+			<span class="sc-muted sc-xs">{{ _("Support prepares it and emails you.") }}</span></div>{% endif %}
+	</div>
+	<div class="sc-card">
+		<div class="sc-card-h"><span class="t">{{ _("How it was built") }}</span><span class="d">{{ _("The steps we ran to set it up.") }}</span></div>
+		<div class="sc-card-c">{% if job %}{% include "stemic_cloud/templates/cloud/job_steps.html" %}{% else %}<p class="sc-empty">{{ _("No record of the set-up.") }}</p>{% endif %}</div>
+	</div>
 </div>
 {% endif %}
 {% endblock %}

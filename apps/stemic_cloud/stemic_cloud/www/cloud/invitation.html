@@ -1,10 +1,12 @@
 {% extends "stemic_cloud/templates/cloud/plain.html" %}
 {% from "stemic_cloud/templates/cloud/macros.html" import seal %}
 {% block plain_content %}
-<div class="sc-sheet" style="max-width: 600px; margin: 20px auto; text-align: center">
-	<div style="display: grid; place-items: center; margin-bottom: 14px">{{ seal(rosette, "stopped", _("Invitation"), 150) }}</div>
-	<h1 style="font-size: var(--f3)">{{ _("This invitation did not work") }}</h1>
-	<p style="margin: 0 auto 22px">{{ error }}</p>
-	<div class="sc-acts" style="justify-content: center"><a class="sc-btn go" href="/cloud">{{ _("Go to your account") }}</a></div>
+<div class="sc-card" style="max-width: 480px; width: 100%; margin: 48px auto; text-align: center">
+	<div class="sc-card-c" style="display: grid; place-items: center; gap: 12px">
+		{{ seal(rosette, "stopped", "", 88) }}
+		<div style="font-size: var(--lg); font-weight: 500">{{ _("This invitation did not work") }}</div>
+		<p class="sc-muted">{{ error }}</p>
+	</div>
+	<div class="sc-card-f" style="justify-content: center"><a class="sc-btn sm" href="/cloud">{{ _("Go to your account") }}</a></div>
 </div>
 {% endblock %}

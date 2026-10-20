@@ -26,11 +26,12 @@ def base(context, key, title):
 	wanted = frappe.form_dict.get("org")
 	org = next((o for o in orgs if o.name == wanted), orgs[0])
 	doc = frappe.get_doc("Cloud Organization", org.name)
+	live = frappe.db.get_value("Tenant", {"organization": org.name, "status": ["in", ["Active", "Suspended"]]}, "url")
 	context.update({"orgs": orgs, "org": doc, "role": org.role,
 		"nav": [n for n in NAV if n[0] != "billing" or can(org.role, "view_billing")], "page_key": key, "title": _(title),
 		"full_name": frappe.utils.get_fullname(frappe.session.user),
 		"support_email": frappe.get_cached_doc("Cloud Settings").support_email,
-		"rosette": rosette(200), "no_cache": 1, "show_sidebar": False, "full_width": 1, "can": lambda action: can(org.role, action),
+		"rosette": rosette(200), "header_erp": live, "no_cache": 1, "show_sidebar": False, "full_width": 1, "can": lambda action: can(org.role, action),
 		"fmt_date": lambda d: frappe.utils.formatdate(d) if d else "",
 		"fmt_dt": lambda d: frappe.utils.format_datetime(d, "dd-MM-yyyy HH:mm") if d else "",
 		"money": lambda v, c=None: frappe.format(v or 0, {"fieldtype": "Currency", "options": c, "precision": 2},

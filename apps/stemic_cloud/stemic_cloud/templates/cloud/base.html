@@ -1,37 +1,50 @@
 {% extends "templates/web.html" %}
-{#- The customer portal's frame: the ink bar with the organisation, the folder tabs, one sheet per page. -#}
-{% from "stemic_cloud/templates/cloud/macros.html" import mark %}
+{#- The customer portal's frame, after the shadcn admin: a 272 px sidebar (organisation, the account's pages, help and
+    the person), a 48 px header with the page's place, and the content. -#}
+{% from "stemic_cloud/templates/cloud/macros.html" import mark, icon %}
 {% block title %}{{ title }}, Stemic Insurance{% endblock %}
 {% block navbar %}{% endblock %}
 {% block footer %}{% endblock %}
 {% block page_content %}
 {% include "stemic_cloud/templates/cloud/style.html" %}
-<div class="sc">
-	<header class="sc-top"><div class="sc-top-in">
-		<div class="sc-top-row">
-			<a class="sc-mark" href="/cloud">{{ mark(rosette) }}<span>Stemic Insurance <small>{{ _("account") }}</small></span></a>
-			<div class="sc-who">
-				{% if orgs|length > 1 %}
-				<label class="sc-hide" for="sc-org">{{ _("Organisation") }}</label>
-				<select id="sc-org" onchange="location.search = '?org=' + encodeURIComponent(this.value)">
-					{% for o in orgs %}<option value="{{ o.name }}" {{ 'selected' if o.name == org.name else '' }}>{{ o.org_name }}</option>{% endfor %}
-				</select>{% else %}<span><b>{{ org.org_name }}</b></span>{% endif %}
-				<span>{{ full_name }}, {{ _(role)|lower }}</span>
-				<a href="/?cmd=web_logout">{{ _("Log out") }}</a>
-			</div>
-		</div>
-		<nav class="sc-tabs" aria-label="{{ _('Account') }}">
+{% set q = '?org=' + org.name if orgs|length > 1 else '' %}
+<div class="sc"><div class="sc-app" id="sc-app">
+	<aside class="sc-side" id="sc-side">
+		<a class="sc-side-brand" href="/cloud{{ q }}">{{ mark(rosette) }}<span>Stemic Insurance</span></a>
+		{% if orgs|length > 1 %}<div class="sc-org"><label class="sc-hide" for="sc-org">{{ _("Organisation") }}</label>
+			<select class="sc-in" id="sc-org" onchange="location.search = '?org=' + encodeURIComponent(this.value)">
+				{% for o in orgs %}<option value="{{ o.name }}" {{ 'selected' if o.name == org.name else '' }}>{{ o.org_name }}</option>{% endfor %}
+			</select></div>{% endif %}
+		<nav class="sc-group sc-nav" aria-label="{{ _('Account') }}">
+			<div class="sc-group-label">{{ org.org_name if orgs|length < 2 else _("Account") }}</div>
 			{% for key, label in nav %}
-			<a href="/cloud{{ '/' + key if key else '' }}{{ '?org=' + org.name if orgs|length > 1 else '' }}" class="{{ 'on' if key == page_key else '' }}" {{ 'aria-current="page"' if key == page_key else '' }}>{{ _(label) }}</a>
+			<a href="/cloud{{ '/' + key if key else '' }}{{ q }}" class="{{ 'on' if key == page_key else '' }}" {{ 'aria-current="page"' if key == page_key else '' }}>{{ icon(key or "home") }}<span>{{ _(label) }}</span></a>
 			{% endfor %}
 		</nav>
-	</div></header>
-	<main class="sc-page">
-		<div id="sc-notice" class="sc-note sc-hide" role="status"></div>
-		<div class="sc-sheet">{% block cloud_content %}{% endblock %}</div>
-		<p class="sc-quiet sc-small" style="margin-top: 18px">{% if support_email %}{{ _("Questions about your account:") }} <a href="mailto:{{ support_email }}">{{ support_email }}</a>{% endif %}</p>
-	</main>
-</div>
+		<div class="sc-side-foot">
+			{% if support_email %}<div class="sc-help"><b>{{ _("Need a hand?") }}</b><p class="sc-muted sc-xs" style="margin-bottom: 8px">{{ _("Write to support about your account or your ERP.") }}</p>
+				<a class="sc-btn outline sm" style="width: 100%" href="mailto:{{ support_email }}">{{ icon("mail") }}{{ _("Email support") }}</a></div>{% endif %}
+			<div class="sc-user"><span class="sc-avatar">{{ ((full_name or "?").split()|map("first")|join("")|upper)[:2] }}</span>
+				<span class="who"><b>{{ full_name }}</b><span>{{ frappe.session.user }}, {{ _(role)|lower }}</span></span>
+				<a class="sc-btn ghost icon" href="/?cmd=web_logout" title="{{ _('Log out') }}" aria-label="{{ _('Log out') }}">{{ icon("out") }}</a></div>
+		</div>
+	</aside>
+	<div class="sc-scrim" onclick="document.getElementById('sc-app').classList.remove('open')"></div>
+	<div class="sc-main">
+		<header class="sc-head">
+			<div class="sc-crumb">
+				<button class="sc-btn ghost icon sc-toggle" aria-controls="sc-side" aria-label="{{ _('Menu') }}" onclick="document.getElementById('sc-app').classList.toggle('open')">{{ icon("panel") }}</button>
+				<span class="sc-sep sc-toggle"></span>
+				<span class="nw">{{ org.org_name }}</span><span>/</span><b>{{ title }}</b>
+			</div>
+			{% if header_erp and page_key %}<a class="sc-btn outline sm" href="{{ header_erp }}" target="_blank" rel="noopener">{{ icon("open") }}{{ _("Open your ERP") }}</a>{% endif %}
+		</header>
+		<main class="sc-content">
+			<div id="sc-notice" class="sc-note sc-hide" role="status"></div>
+			{% block cloud_content %}{% endblock %}
+		</main>
+	</div>
+</div></div>
 {% endblock %}
 {% block script %}
 {{ super() }}
