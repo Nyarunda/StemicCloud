@@ -1,0 +1,23 @@
+{
+ "aggregate_function_based_on": "",
+ "color": "#2F80ED",
+ "creation": "2026-10-20 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Cloud Organization",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Cloud Organization\", \"status\", \"=\", \"Active\"]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Organizations",
+ "modified": "2026-10-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stemic Cloud",
+ "name": "Organizations",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Monthly",
+ "type": "Document Type"
+}

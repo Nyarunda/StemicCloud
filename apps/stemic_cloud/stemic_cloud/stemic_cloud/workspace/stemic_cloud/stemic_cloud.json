@@ -1,0 +1,302 @@
+{
+ "app": "stemic_cloud",
+ "charts": [],
+ "content": "[{\"id\": \"head\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Stemic Cloud</b></span>\", \"col\": 12}}, {\"id\": \"note\", \"type\": \"paragraph\", \"data\": {\"text\": \"Organisations, subscriptions, tenants and their provisioning. Platform staff see these records, never a tenant's insurance data.\", \"col\": 12}}, {\"id\": \"nc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Organizations\", \"col\": 3}}, {\"id\": \"nc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Subscriptions\", \"col\": 3}}, {\"id\": \"nc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Trial Organizations\", \"col\": 3}}, {\"id\": \"nc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Past Due or Grace\", \"col\": 3}}, {\"id\": \"nc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Suspended Subscriptions\", \"col\": 3}}, {\"id\": \"nc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Tenants\", \"col\": 3}}, {\"id\": \"nc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Tenants With Alerts\", \"col\": 3}}, {\"id\": \"nc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Failed Provisioning\", \"col\": 3}}, {\"id\": \"nc8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Outstanding Invoices\", \"col\": 3}}, {\"id\": \"nc9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Monthly Recurring Revenue\", \"col\": 3}}, {\"id\": \"cd0\", \"type\": \"card\", \"data\": {\"card_name\": \"Customers\", \"col\": 3}}, {\"id\": \"cd1\", \"type\": \"card\", \"data\": {\"card_name\": \"Tenants\", \"col\": 3}}, {\"id\": \"cd2\", \"type\": \"card\", \"data\": {\"card_name\": \"Billing\", \"col\": 3}}, {\"id\": \"cd3\", \"type\": \"card\", \"data\": {\"card_name\": \"Platform\", \"col\": 3}}]",
+ "creation": "2026-10-20 12:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "cloud",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Stemic Cloud",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customers",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Organizations",
+   "link_count": 0,
+   "link_to": "Cloud Organization",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Members",
+   "link_count": 0,
+   "link_to": "Organization Member",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Invitations",
+   "link_count": 0,
+   "link_to": "Organization Invitation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Registrations",
+   "link_count": 0,
+   "link_to": "Cloud Registration",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenants",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenants",
+   "link_count": 0,
+   "link_to": "Tenant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Provisioning Jobs",
+   "link_count": 0,
+   "link_to": "Tenant Provisioning Job",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Deployment Groups",
+   "link_count": 0,
+   "link_to": "Deployment Group",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Access Grants",
+   "link_count": 0,
+   "link_to": "Tenant Access Grant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Billing",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Subscriptions",
+   "link_count": 0,
+   "link_to": "Cloud Subscription",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Invoices",
+   "link_count": 0,
+   "link_to": "Subscription Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Plans",
+   "link_count": 0,
+   "link_to": "Subscription Plan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Platform",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Audit Log",
+   "link_count": 0,
+   "link_to": "Cloud Audit Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Settings",
+   "link_count": 0,
+   "link_to": "Cloud Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Users",
+   "link_count": 0,
+   "link_to": "User",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Activity Log",
+   "link_count": 0,
+   "link_to": "Activity Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-10-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stemic Cloud",
+ "name": "Stemic Cloud",
+ "number_cards": [
+  {
+   "label": "Organizations",
+   "number_card_name": "Organizations"
+  },
+  {
+   "label": "Active Subscriptions",
+   "number_card_name": "Active Subscriptions"
+  },
+  {
+   "label": "Trial Organizations",
+   "number_card_name": "Trial Organizations"
+  },
+  {
+   "label": "Past Due or Grace",
+   "number_card_name": "Past Due or Grace"
+  },
+  {
+   "label": "Suspended Subscriptions",
+   "number_card_name": "Suspended Subscriptions"
+  },
+  {
+   "label": "Active Tenants",
+   "number_card_name": "Active Tenants"
+  },
+  {
+   "label": "Tenants With Alerts",
+   "number_card_name": "Tenants With Alerts"
+  },
+  {
+   "label": "Failed Provisioning",
+   "number_card_name": "Failed Provisioning"
+  },
+  {
+   "label": "Outstanding Invoices",
+   "number_card_name": "Outstanding Invoices"
+  },
+  {
+   "label": "Monthly Recurring Revenue",
+   "number_card_name": "Monthly Recurring Revenue"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "role": "Platform Super Admin"
+  },
+  {
+   "role": "Platform Support"
+  },
+  {
+   "role": "Platform Finance"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Organizations",
+   "link_to": "Cloud Organization",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Tenants",
+   "link_to": "Tenant",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Unpaid Invoices",
+   "link_to": "Subscription Invoice",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Audit Log",
+   "link_to": "Cloud Audit Log",
+   "type": "DocType"
+  }
+ ],
+ "standard": 1,
+ "title": "Stemic Cloud",
+ "type": "Workspace"
+}

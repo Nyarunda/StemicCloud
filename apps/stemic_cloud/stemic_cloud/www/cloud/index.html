@@ -1,0 +1,43 @@
+{% extends "stemic_cloud/templates/cloud/base.html" %}
+{% block cloud_content %}
+<div class="sc-hero">
+	<div><h1>{{ _("Welcome to Stemic Insurance") }}</h1>
+		<div class="sub">{{ org.org_name }} · {{ _(org.org_type) }}</div></div>
+	{% if tenant and tenant.status == "Active" %}<a class="sc-btn primary" href="{{ tenant.url }}" target="_blank" rel="noopener">{{ _("Open Insurance ERP") }} →</a>{% endif %}
+</div>
+
+<div class="sc-grid sc-cols-3" style="margin-bottom: 16px">
+	<div class="sc-panel sc-kpi"><div class="l">{{ _("ERP") }}</div>
+		<div class="v">{% if tenant %}<span class="sc-pill {{ {'Active': 'good', 'Provisioning': 'info', 'Reserved': 'info', 'Failed': 'bad', 'Suspended': 'warn'}.get(tenant.status, '') }}">{{ _("Online") if tenant.status == "Active" and tenant.health != "Unreachable" else _(tenant.status) }}</span>{% else %}—{% endif %}</div>
+		<div class="f">{{ tenant.site_name if tenant else _("Not created") }}</div></div>
+	<div class="sc-panel sc-kpi"><div class="l">{{ _("Subscription") }}</div>
+		<div class="v">{{ plan.plan_name if plan else "—" }}</div>
+		<div class="f">{% if sub %}<span class="sc-pill {{ {'Active': 'good', 'Trial': 'info', 'Past Due': 'warn', 'Grace': 'warn', 'Suspended': 'bad', 'Cancelled': 'bad'}.get(sub.status, '') }}">{{ _(sub.status) }}</span>
+			{% if sub.status == "Trial" %} {{ _("until {0}").format(fmt_date(sub.trial_ends_on)) }}{% elif sub.current_period_end %} {{ _("renews {0}").format(fmt_date(sub.current_period_end)) }}{% endif %}{% endif %}</div></div>
+	<div class="sc-panel sc-kpi"><div class="l">{{ _("ERP users") }}</div>
+		<div class="v">{{ sub.active_users if sub and sub.active_users is not none else "—" }}{% if plan and plan.max_users %} <span class="sc-muted" style="font-size: .9rem">{{ _("of {0}").format(plan.max_users) }}</span>{% endif %}</div>
+		<div class="f">{% if sub and sub.seat_warning %}<span class="sc-pill warn">{{ sub.seat_warning }}</span>{% else %}{{ _("Counted daily") }}{% endif %}</div></div>
+	<div class="sc-panel sc-kpi"><div class="l">{{ _("Billing") }}</div>
+		<div class="v">{% if unpaid %}{{ money(unpaid|sum(attribute="amount"), unpaid[0].currency) }}{% else %}{{ _("Current") }}{% endif %}</div>
+		<div class="f">{% if unpaid %}{{ _("{0} unpaid, next due {1}").format(unpaid|length, fmt_date(unpaid[0].due_date)) }}{% else %}{{ _("Nothing owed") }}{% endif %}</div></div>
+	<div class="sc-panel sc-kpi"><div class="l">{{ _("Security") }}</div>
+		<div class="v">{{ admins }}</div><div class="f">{{ _("owners and admins · {0} members").format(members) }}</div></div>
+	<div class="sc-panel sc-kpi"><div class="l">{{ _("Onboarding") }}</div>
+		<div class="v">{{ progress }}%</div><div class="sc-meter" style="margin-top: 8px"><div style="width: {{ progress }}%"></div></div></div>
+</div>
+
+<div class="sc-grid sc-cols-2">
+	{% if job and job.status != "Succeeded" %}
+	<div class="sc-panel"><h2>{{ _("Setting up your ERP") }}</h2>
+		<ul class="sc-steps">{% for s in job.steps %}
+			<li><span class="sc-tick {{ s.status }}">{{ '✓' if s.status == 'Done' else ('!' if s.status == 'Failed' else '') }}</span><span>{{ _(s.title) }}</span>
+				<span class="sc-muted" style="font-size: .78rem">{{ _(s.status) }}</span></li>{% endfor %}</ul>
+		{% if job.status == "Failed" %}<p class="sc-muted">{{ _("Our team has been told and will finish it.") }}</p>
+		{% else %}<p class="sc-muted">{{ _("This takes a few minutes; refresh to follow it.") }}</p>{% endif %}
+	</div>
+	{% endif %}
+	<div class="sc-panel"><h2>{{ _("Recent activity") }}</h2>
+		{% if activity %}<table>{% for a in activity %}<tr><td class="sc-muted" style="width: 140px">{{ fmt_dt(a.at) }}</td><td>{{ _(a.action) }}</td></tr>{% endfor %}</table>
+		{% else %}<div class="sc-empty">{{ _("Nothing yet") }}</div>{% endif %}</div>
+</div>
+{% endblock %}

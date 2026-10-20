@@ -1,0 +1,214 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-10-20 12:00:00.000000",
+ "description": "An insurance company registered on the platform: its details, the terms it accepted, its subscription and tenant. Platform staff see this record, never the tenant's insurance data.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "org_name",
+  "org_type",
+  "registration_number",
+  "country",
+  "currency",
+  "time_zone",
+  "org_col",
+  "business_email",
+  "phone",
+  "preferred_subdomain",
+  "status",
+  "owner_user",
+  "terms_section",
+  "terms_version",
+  "terms_accepted_on",
+  "terms_ip",
+  "onboarding_section",
+  "onboarding_progress",
+  "onboarding"
+ ],
+ "fields": [
+  {
+   "default": "ORG-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "ORG-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "org_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Company Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "org_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Organization Type",
+   "options": "Insurance Broker\nInsurance Agency\nInsurer / Underwriter\nManaging General Agent\nInsurance Service Provider",
+   "reqd": 1
+  },
+  {
+   "fieldname": "registration_number",
+   "fieldtype": "Data",
+   "label": "Registration Number"
+  },
+  {
+   "default": "Kenya",
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "default": "KES",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "default": "Africa/Nairobi",
+   "fieldname": "time_zone",
+   "fieldtype": "Data",
+   "label": "Time Zone"
+  },
+  {
+   "fieldname": "org_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "business_email",
+   "fieldtype": "Data",
+   "label": "Business Email",
+   "options": "Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "preferred_subdomain",
+   "fieldtype": "Data",
+   "label": "Subdomain",
+   "reqd": 1
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nSuspended\nClosed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "owner_user",
+   "fieldtype": "Link",
+   "label": "Owner",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "terms_section",
+   "fieldtype": "Section Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "terms_version",
+   "fieldtype": "Data",
+   "label": "Terms Accepted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "terms_accepted_on",
+   "fieldtype": "Datetime",
+   "label": "Accepted On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "terms_ip",
+   "fieldtype": "Data",
+   "label": "From Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "onboarding_section",
+   "fieldtype": "Section Break",
+   "label": "Onboarding"
+  },
+  {
+   "fieldname": "onboarding_progress",
+   "fieldtype": "Percent",
+   "label": "Progress",
+   "read_only": 1
+  },
+  {
+   "fieldname": "onboarding",
+   "fieldtype": "Table",
+   "label": "Steps",
+   "options": "Cloud Onboarding Step",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stemic Cloud",
+ "name": "Cloud Organization",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Super Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Support",
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Finance"
+  }
+ ],
+ "search_fields": "org_name,business_email,status",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "org_name",
+ "track_changes": 1
+}

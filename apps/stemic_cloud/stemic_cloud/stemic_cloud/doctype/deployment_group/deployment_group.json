@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "autoname": "field:group_name",
+ "creation": "2026-10-20 12:00:00.000000",
+ "description": "Where tenants are created: a bench on a server, the apps installed on each new site, and how commands reach it. Phase 1 runs the bench on the platform's own server.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "group_name",
+  "is_default",
+  "enabled",
+  "runner",
+  "bench_path",
+  "dg_col",
+  "apps",
+  "db_root_password",
+  "health_base",
+  "max_tenants",
+  "setup_nginx"
+ ],
+ "fields": [
+  {
+   "fieldname": "group_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Default for New Tenants"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Takes New Tenants"
+  },
+  {
+   "default": "Dry Run",
+   "description": "Dry Run records each command without running it (for testing the portal).",
+   "fieldname": "runner",
+   "fieldtype": "Select",
+   "label": "Runs Commands",
+   "options": "Local Bench\nDry Run",
+   "reqd": 1
+  },
+  {
+   "description": "For example /home/frappe/frappe-bench.",
+   "fieldname": "bench_path",
+   "fieldtype": "Data",
+   "label": "Bench Folder"
+  },
+  {
+   "fieldname": "dg_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "erpnext\ninsurance",
+   "description": "One per line, in order.",
+   "fieldname": "apps",
+   "fieldtype": "Small Text",
+   "label": "Apps on Each Site",
+   "reqd": 1
+  },
+  {
+   "fieldname": "db_root_password",
+   "fieldtype": "Password",
+   "label": "MariaDB Root Password"
+  },
+  {
+   "description": "Blank: https://{site}. On one server, for example http://127.0.0.1:8000 with the site as Host.",
+   "fieldname": "health_base",
+   "fieldtype": "Data",
+   "label": "Health Check Through"
+  },
+  {
+   "fieldname": "max_tenants",
+   "fieldtype": "Int",
+   "label": "At Most (Tenants)"
+  },
+  {
+   "default": "1",
+   "fieldname": "setup_nginx",
+   "fieldtype": "Check",
+   "label": "Write nginx After Each Site"
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stemic Cloud",
+ "name": "Deployment Group",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Super Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Support"
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "group_name",
+ "track_changes": 1
+}

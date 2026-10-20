@@ -1,0 +1,32 @@
+{% extends "stemic_cloud/templates/cloud/base.html" %}
+{% block cloud_content %}
+<h1>{{ _("Security") }}</h1><div class="sub">{{ _("Your sign-ins, and who at Stemic may access your ERP.") }}</div>
+<div class="sc-grid sc-cols-2" style="margin-bottom: 16px">
+	<div class="sc-panel"><h2>{{ _("Your account") }}</h2>
+		<dl class="sc-dl">
+			<dt>{{ _("Two-factor login") }}</dt><dd><span class="sc-pill {{ 'good' if two_factor else 'warn' }}">{{ _("On") if two_factor else _("Off") }}</span></dd>
+			<dt>{{ _("Sessions") }}</dt><dd>{{ sessions if sessions is not none else "—" }}</dd>
+		</dl>
+		<div class="sc-row" style="margin-top: 14px; flex: none">
+			<a class="sc-btn" style="flex: none" href="/update-password">{{ _("Change password") }}</a>
+			<button class="sc-btn" style="flex: none" onclick="sc.call('stemic_cloud.portal.sign_out_elsewhere', {}, () => sc.notice('{{ _('Your other sessions are signed out.') }}', 'good'))">{{ _("Sign out other sessions") }}</button>
+		</div>
+	</div>
+	<div class="sc-panel"><h2>{{ _("Recent sign-ins") }}</h2>
+		{% if logins %}<table><tr><th>{{ _("When") }}</th><th>{{ _("What") }}</th><th>{{ _("From") }}</th></tr>
+			{% for l in logins %}<tr><td>{{ fmt_dt(l.creation) }}</td><td>{{ _(l.operation) }} <span class="sc-pill {{ 'good' if l.status == 'Success' else 'bad' }}">{{ _(l.status) }}</span></td><td class="sc-muted">{{ l.ip_address or "" }}</td></tr>{% endfor %}</table>
+		{% else %}<div class="sc-empty">{{ _("No sign-ins recorded") }}</div>{% endif %}
+	</div>
+</div>
+<div class="sc-panel"><h2>{{ _("Stemic access to your ERP") }}</h2>
+	<p class="sc-muted" style="font-size: .85rem">{{ _("Stemic staff have no login on your ERP. When support needs one, they ask here with a reason; you decide, and the access ends by itself.") }}</p>
+	{% if grants %}<table><tr><th>{{ _("Asked") }}</th><th>{{ _("By") }}</th><th>{{ _("Why") }}</th><th>{{ _("Scope") }}</th><th>{{ _("Status") }}</th><th></th></tr>
+		{% for g in grants %}<tr><td>{{ fmt_dt(g.creation) }}</td><td>{{ g.requested_by }}</td><td>{{ g.reason }}</td><td>{{ _(g.scope) }}, {{ g.hours }} h</td>
+			<td><span class="sc-pill {{ {'Approved': 'good', 'Requested': 'info', 'Rejected': 'bad'}.get(g.status, '') }}">{{ _(g.status) }}</span>{% if g.status == "Approved" %} <span class="sc-muted" style="font-size: .78rem">{{ _("until {0}").format(fmt_dt(g.valid_until)) }}</span>{% endif %}</td>
+			<td class="num">{% if can("approve_access") %}{% if g.status == "Requested" %}
+				<button class="sc-btn primary sm" onclick="sc.call('stemic_cloud.portal.decide_access', {organization: sc.org, grant: '{{ g.name }}', approve: 1}, () => location.reload())">{{ _("Approve") }}</button>
+				<button class="sc-btn sm" onclick="sc.call('stemic_cloud.portal.decide_access', {organization: sc.org, grant: '{{ g.name }}', approve: 0}, () => location.reload())">{{ _("Reject") }}</button>
+				{% elif g.status == "Approved" %}<button class="sc-btn danger sm" onclick="sc.call('stemic_cloud.portal.end_access', {organization: sc.org, grant: '{{ g.name }}'}, () => location.reload())">{{ _("End now") }}</button>{% endif %}{% endif %}</td></tr>{% endfor %}</table>
+	{% else %}<div class="sc-empty">{{ _("No requests") }}</div>{% endif %}
+</div>
+{% endblock %}

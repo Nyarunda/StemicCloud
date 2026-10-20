@@ -1,0 +1,188 @@
+{
+ "actions": [],
+ "autoname": "field:site_name",
+ "creation": "2026-10-20 12:00:00.000000",
+ "description": "One customer ERP environment: a Frappe site with ERPNext and the insurance app at {subdomain}.{root domain}.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "site_name",
+  "subdomain",
+  "organization",
+  "deployment_group",
+  "status",
+  "tenant_col",
+  "url",
+  "app_version",
+  "admin_email",
+  "health_section",
+  "health",
+  "last_health_check",
+  "last_backup_on",
+  "health_col",
+  "last_job",
+  "read_only"
+ ],
+ "fields": [
+  {
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Site",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "subdomain",
+   "fieldtype": "Data",
+   "label": "Subdomain",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "organization",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Organization",
+   "options": "Cloud Organization",
+   "read_only": 1
+  },
+  {
+   "fieldname": "deployment_group",
+   "fieldtype": "Link",
+   "label": "Deployment Group",
+   "options": "Deployment Group",
+   "read_only": 1
+  },
+  {
+   "default": "Reserved",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Reserved\nProvisioning\nActive\nFailed\nSuspended\nArchived",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tenant_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "url",
+   "fieldtype": "Data",
+   "label": "Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "app_version",
+   "fieldtype": "Data",
+   "label": "Insurance App Version",
+   "read_only": 1
+  },
+  {
+   "fieldname": "admin_email",
+   "fieldtype": "Data",
+   "label": "Administrator",
+   "read_only": 1
+  },
+  {
+   "fieldname": "health_section",
+   "fieldtype": "Section Break",
+   "label": "Health"
+  },
+  {
+   "default": "Unknown",
+   "fieldname": "health",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Health",
+   "options": "Unknown\nHealthy\nUnreachable",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_health_check",
+   "fieldtype": "Datetime",
+   "label": "Checked",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_backup_on",
+   "fieldtype": "Datetime",
+   "label": "Last Backup",
+   "read_only": 1
+  },
+  {
+   "fieldname": "health_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_job",
+   "fieldtype": "Link",
+   "label": "Last Provisioning Job",
+   "options": "Tenant Provisioning Job",
+   "read_only": 1
+  },
+  {
+   "fieldname": "read_only",
+   "fieldtype": "Check",
+   "label": "Read Only (Suspended)",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-10-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stemic Cloud",
+ "name": "Tenant",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Super Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Support",
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Finance"
+  }
+ ],
+ "search_fields": "organization,status",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "site_name",
+ "track_changes": 1
+}

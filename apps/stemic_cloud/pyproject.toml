@@ -1,0 +1,18 @@
+[project]
+name = "stemic_cloud"
+authors = [{ name = "Nyarunda" }]
+description = "Stemic Cloud: the control plane that registers insurance companies, bills them and provisions their ERP sites"
+requires-python = ">=3.14"
+readme = "README.md"
+dynamic = ["version"]
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.format]
+indent-style = "tab"

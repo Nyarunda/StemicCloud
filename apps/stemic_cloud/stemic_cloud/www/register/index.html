@@ -1,0 +1,88 @@
+{% extends "templates/web.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block page_content %}
+{% include "stemic_cloud/templates/cloud/style.html" %}
+<div class="sc">
+	<header class="sc-bar"><a class="sc-brand" href="/register"><span class="sc-logo">S</span>STEMIC INSURANCE</a>
+		<div class="sc-bar-r"><a class="sc-link" href="/login?redirect-to=/cloud">{{ _("Log in") }}</a></div></header>
+	<main class="sc-main" style="max-width: 1040px; margin: 0 auto">
+		<div class="sc-hero"><h1>{{ title }}</h1>
+			<div class="sub">{{ _("Policies, quotations, renewals, commissions and accounts for brokers, agencies and insurers, on your own address.") }}</div></div>
+		<div id="sc-notice" class="sc-notice" style="display: none"></div>
+		<div id="reg">
+		<h2 style="margin: 18px 0 10px">1. {{ _("Choose a plan") }}</h2>
+		<div class="sc-grid sc-cols-3">
+			{% for p in plans %}<label class="sc-plan sc-panel">
+				<input type="radio" name="plan" value="{{ p.name }}" {{ 'disabled' if p.contact_sales else '' }} {{ 'checked' if (wanted == p.name) or (not wanted and loop.first and not p.contact_sales) else '' }}>
+				<b>{{ p.plan_name }}</b>
+				<div class="p">{% if p.contact_sales %}{{ _("Custom") }}{% else %}{{ money(p.monthly_price, p.currency) }}<span class="sc-muted" style="font-size: .8rem"> / {{ _("month") }}</span>{% endif %}</div>
+				<div class="sc-muted" style="font-size: .82rem">{{ _("{0} ERP users").format(p.max_users) if p.max_users else _("Users by contract") }}{% if p.trial and not p.contact_sales %} · {{ _("{0}-day free trial").format(p.trial) }}{% endif %}</div>
+				{% if p.description %}<p style="font-size: .85rem">{{ p.description }}</p>{% endif %}
+				{% if p.features %}<ul style="font-size: .82rem; padding-left: 18px; margin: 6px 0 0">{% for f in p.features %}<li>{{ f.feature }}{% if f.value and f.value != "Yes" %}: {{ f.value }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+				{% if p.contact_sales and support_email %}<a class="sc-btn sm" style="margin-top: 8px" href="mailto:{{ support_email }}?subject={{ p.plan_name }}">{{ _("Talk to sales") }}</a>{% endif %}
+			</label>{% else %}<div class="sc-empty">{{ _("No plans are offered yet.") }}</div>{% endfor %}
+		</div>
+		<div style="margin-top: 10px"><label><input type="radio" name="billing_cycle" value="Monthly" checked> {{ _("Billed monthly") }}</label>
+			&nbsp; <label><input type="radio" name="billing_cycle" value="Annual"> {{ _("Billed yearly") }}</label></div>
+
+		<div class="sc-grid sc-cols-2" style="margin-top: 18px">
+			<div class="sc-panel"><h2>2. {{ _("Your company") }}</h2>
+				<label>{{ _("Company name") }}</label><input class="sc-input" name="org_name" required>
+				<label>{{ _("Type of business") }}</label><select class="sc-input" name="org_type">{% for t in org_types %}<option>{{ t }}</option>{% endfor %}</select>
+				<label>{{ _("Registration or licence number (optional)") }}</label><input class="sc-input" name="registration_number">
+				<div class="sc-row"><div><label>{{ _("Country") }}</label><input class="sc-input" name="country" value="Kenya"></div>
+					<div><label>{{ _("Currency") }}</label><input class="sc-input" name="currency" value="KES"></div></div>
+				<label>{{ _("Your ERP address") }}</label>
+				<div class="sc-row" style="align-items: center"><input class="sc-input" name="subdomain" id="subdomain" autocomplete="off" style="flex: 1"><span style="flex: none" class="sc-muted">.{{ root_domain }}</span></div>
+				<div id="sub-msg" class="sc-muted" style="font-size: .82rem; min-height: 1.2em"></div>
+			</div>
+			<div class="sc-panel"><h2>3. {{ _("You") }}</h2>
+				<label>{{ _("Full name") }}</label><input class="sc-input" name="full_name" required>
+				<label>{{ _("Work email") }}</label><input class="sc-input" type="email" name="email" required>
+				<label>{{ _("Phone (optional)") }}</label><input class="sc-input" name="phone">
+				<p class="sc-muted" style="font-size: .82rem">{{ _("You become the owner of the organisation and the first administrator of its ERP. We email you a link to confirm the address; then you set your password.") }}</p>
+				<label style="display: flex; gap: 8px; align-items: flex-start; margin-top: 10px"><input type="checkbox" name="accept_terms" style="width: auto">
+					<span>{{ _("I accept the") }} {% if terms_url %}<a href="{{ terms_url }}" target="_blank" rel="noopener">{{ _("terms of service") }}</a>{% else %}{{ _("terms of service") }}{% endif %}</span></label>
+				<button class="sc-btn primary" id="go" style="margin-top: 14px; width: 100%">{{ _("Create my organisation") }}</button>
+			</div>
+		</div>
+		</div>
+		<div id="sent" class="sc-panel" style="display: none; max-width: 560px; margin: 30px auto"><h2>{{ _("Check your email") }}</h2><p id="sent-text"></p></div>
+	</main>
+</div>
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+frappe.ready(() => {
+	const $ = (s) => document.querySelector(s), sub = $("#subdomain"), msg = $("#sub-msg");
+	const notice = (t, kind) => { const n = $("#sc-notice"); n.className = "sc-notice " + (kind || ""); n.innerHTML = t; n.style.display = "block"; window.scrollTo(0, 0); };
+	const slug = (v) => v.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30);
+	let typed = false, timer;
+	document.querySelector("[name=org_name]").addEventListener("input", (e) => { if (!typed) { sub.value = slug(e.target.value); check(); } });
+	sub.addEventListener("input", () => { typed = true; check(); });
+	function check() {
+		clearTimeout(timer);
+		if (!sub.value) { msg.textContent = ""; return; }
+		timer = setTimeout(() => frappe.call({ method: "stemic_cloud.accounts.check_subdomain", args: { subdomain: sub.value },
+			callback: (r) => { const m = r.message || {}; msg.textContent = m.ok ? "{{ _('Available') }} ✓" : (m.problems || []).join(" ");
+				msg.style.color = m.ok ? "var(--good)" : "var(--bad)"; } }), 350);
+	}
+	$("#go").addEventListener("click", () => {
+		const args = {};
+		document.querySelectorAll("#reg [name]").forEach((el) => {
+			if (el.type === "radio") { if (el.checked) args[el.name] = el.value; }
+			else args[el.name] = el.type === "checkbox" ? (el.checked ? 1 : 0) : el.value.trim();
+		});
+		$("#go").disabled = true;
+		frappe.call({ method: "stemic_cloud.accounts.register", args, type: "POST",
+			callback: (r) => { $("#go").disabled = false; if (r.exc) return;
+				$("#reg").style.display = "none"; $("#sc-notice").style.display = "none";
+				$("#sent").style.display = "block"; $("#sent-text").textContent = r.message.message; },
+			error: () => { $("#go").disabled = false; } });
+	});
+	if (sub.value) check();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{
+ "app": "stemic_cloud",
+ "creation": "2026-10-20 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Dock",
+ "idx": 0,
+ "items": [
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "cloud",
+   "link_to": "Stemic Cloud",
+   "link_type": "Sidebar",
+   "title": "Stemic Cloud"
+  }
+ ],
+ "modified": "2026-10-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "stemic_cloud",
+ "owner": "Administrator",
+ "standard": 1,
+ "user": ""
+}

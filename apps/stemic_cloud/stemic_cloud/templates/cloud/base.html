@@ -1,0 +1,47 @@
+{% extends "templates/web.html" %}
+{#- The customer portal's frame: brand bar, organisation switcher, the menu on the left. -#}
+{% block title %}{{ title }} · Stemic Insurance{% endblock %}
+{% block navbar %}{% endblock %}
+{% block page_content %}
+{% include "stemic_cloud/templates/cloud/style.html" %}
+<div class="sc">
+	<header class="sc-bar">
+		<a class="sc-brand" href="/cloud"><span class="sc-logo">S</span>STEMIC INSURANCE</a>
+		<div class="sc-bar-r">
+			{% if orgs|length > 1 %}
+			<select class="sc-input" onchange="location.search='?org='+encodeURIComponent(this.value)">
+				{% for o in orgs %}<option value="{{ o.name }}" {{ 'selected' if o.name == org.name else '' }}>{{ o.org_name }}</option>{% endfor %}
+			</select>{% endif %}
+			<span class="sc-user">{{ full_name }} · {{ _(role) }}</span>
+			<a class="sc-link" href="/?cmd=web_logout">{{ _("Log out") }}</a>
+		</div>
+	</header>
+	<div class="sc-shell">
+		<nav class="sc-side">
+			{% for key, label in nav %}
+			<a href="/cloud{{ '/' + key if key else '' }}{{ '?org=' + org.name if orgs|length > 1 else '' }}" class="{{ 'on' if key == page_key else '' }}">{{ _(label) }}</a>
+			{% endfor %}
+			<div class="sc-side-foot">{% if support_email %}<a href="mailto:{{ support_email }}">{{ _("Support") }}</a>{% endif %}</div>
+		</nav>
+		<main class="sc-main">
+			<div id="sc-notice" class="sc-notice" style="display: none"></div>
+			{% block cloud_content %}{% endblock %}
+		</main>
+	</div>
+</div>
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+window.sc = {
+	org: "{{ org.name }}",
+	call(method, args, done) {
+		return frappe.call({ method, args, type: "POST", callback: (r) => { if (!r.exc && done) done(r.message); } });
+	},
+	notice(text, kind) { const n = document.getElementById("sc-notice"); n.className = "sc-notice " + (kind || "");
+		n.textContent = text; n.style.display = "block"; window.scrollTo(0, 0); },
+	form(id) { const out = {}; document.querySelectorAll("#" + id + " [name]").forEach((el) => { out[el.name] = el.type === "checkbox" ? (el.checked ? 1 : 0) : el.value; }); return out; },
+	toggle(id) { const el = document.getElementById(id); el.style.display = el.style.display === "none" ? "block" : "none"; },
+};
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "templates/web.html" %}
+{% block title %}{{ _("Invitation") }}{% endblock %}
+{% block page_content %}
+{% include "stemic_cloud/templates/cloud/style.html" %}
+<div class="sc" style="display: grid; place-items: center; padding: 40px 16px">
+	<div class="sc-panel" style="max-width: 460px; width: 100%"><h1>{{ _("Invitation") }}</h1>
+		<p class="sc-notice bad">{{ error }}</p><a class="sc-btn" href="/cloud">{{ _("Go to the portal") }}</a></div>
+</div>
+{% endblock %}

@@ -1,0 +1,179 @@
+{
+ "actions": [],
+ "autoname": "field:plan_code",
+ "creation": "2026-10-20 12:00:00.000000",
+ "description": "A plan customers subscribe to: price per month or year, user limit and the features shown on the plans page.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "plan_code",
+  "plan_name",
+  "enabled",
+  "is_public",
+  "sort_order",
+  "plan_col",
+  "currency",
+  "monthly_price",
+  "annual_price",
+  "max_users",
+  "trial_days",
+  "contact_sales",
+  "features_section",
+  "features",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "plan_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "plan_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Plan",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Offered"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_public",
+   "fieldtype": "Check",
+   "label": "On the Plans Page"
+  },
+  {
+   "fieldname": "sort_order",
+   "fieldtype": "Int",
+   "label": "Order"
+  },
+  {
+   "fieldname": "plan_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "USD",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "monthly_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Monthly Price",
+   "options": "currency",
+   "precision": "2"
+  },
+  {
+   "description": "Blank: twelve months.",
+   "fieldname": "annual_price",
+   "fieldtype": "Currency",
+   "label": "Annual Price",
+   "options": "currency",
+   "precision": "2"
+  },
+  {
+   "description": "Blank: by contract.",
+   "fieldname": "max_users",
+   "fieldtype": "Int",
+   "label": "ERP Users"
+  },
+  {
+   "description": "Blank: Cloud Settings.",
+   "fieldname": "trial_days",
+   "fieldtype": "Int",
+   "label": "Trial (Days)"
+  },
+  {
+   "fieldname": "contact_sales",
+   "fieldtype": "Check",
+   "label": "Contact Sales (No Self-Service)"
+  },
+  {
+   "fieldname": "features_section",
+   "fieldtype": "Section Break",
+   "label": "Features"
+  },
+  {
+   "fieldname": "features",
+   "fieldtype": "Table",
+   "label": "Features",
+   "options": "Plan Feature"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stemic Cloud",
+ "name": "Subscription Plan",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Super Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Finance",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Platform Support"
+  }
+ ],
+ "search_fields": "plan_name",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "plan_name",
+ "track_changes": 1
+}

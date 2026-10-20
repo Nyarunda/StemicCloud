@@ -1,0 +1,23 @@
+{
+ "aggregate_function_based_on": "",
+ "color": "#9B51E0",
+ "creation": "2026-10-20 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Cloud Subscription",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Cloud Subscription\", \"status\", \"=\", \"Trial\"]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Trial Organizations",
+ "modified": "2026-10-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stemic Cloud",
+ "name": "Trial Organizations",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Monthly",
+ "type": "Document Type"
+}

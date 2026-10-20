@@ -1,0 +1,15 @@
+{% extends "stemic_cloud/templates/cloud/base.html" %}
+{% block cloud_content %}
+<h1>{{ _("Welcome to Stemic Insurance") }}</h1>
+<div class="sub">{{ _("Set up your insurance business in your ERP. Each step opens the ERP's own screen; tick it here when it is done.") }}</div>
+<div class="sc-panel">
+	<div class="sc-row" style="margin-bottom: 12px; align-items: center"><div style="flex: 1"><div class="sc-meter"><div style="width: {{ progress }}%"></div></div></div><b style="flex: none">{{ progress }}%</b></div>
+	{% if not tenant or tenant.status != "Active" %}<div class="sc-notice">{{ _("Your ERP is still being set up; the steps open once it is ready.") }}</div>{% endif %}
+	<ul class="sc-steps">{% for s in steps %}
+		<li><span class="sc-tick {{ 'done' if s.done else '' }}">{{ '✓' if s.done else loop.index }}</span>
+			<span><b>{{ _("Step {0}").format(loop.index) }}:</b> {{ _(s.title) }}</span>
+			<span style="display: flex; gap: 6px">{% if tenant and tenant.status == "Active" %}<a class="sc-btn sm" href="{{ s.url }}" target="_blank" rel="noopener">{{ _("Open") }}</a>{% endif %}
+				{% if can("onboarding") %}<button class="sc-btn sm {{ '' if s.done else 'primary' }}" onclick="sc.call('stemic_cloud.portal.mark_step', {organization: sc.org, code: '{{ s.code }}', done: {{ 0 if s.done else 1 }}}, () => location.reload())">{{ _("Undo") if s.done else _("Done") }}</button>{% endif %}</span></li>{% endfor %}</ul>
+	{% if tenant and tenant.status == "Active" %}<a class="sc-btn primary" style="margin-top: 14px" href="{{ tenant.url }}" target="_blank" rel="noopener">{{ _("Open Insurance ERP") }} →</a>{% endif %}
+</div>
+{% endblock %}
